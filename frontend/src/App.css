@@ -1,0 +1,43 @@
+.page {
+  padding-bottom: 64px;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 14px 0;
+}
+
+.bottom-nav__item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.bottom-nav__item.is-active {
+  color: var(--text-h);
+}
+
+.bottom-nav__item.is-active svg {
+  transform: scale(1.15);
+}
+
+.splash {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+}
+
+.splash img {
+  width: 96px;
+}
