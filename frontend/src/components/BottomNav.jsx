@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { House, Notebook, BookOpen, UsersThree, UserCircle } from '@phosphor-icons/react'
+import { House, ChartBar, BookOpen, UsersThree, Gear } from '@phosphor-icons/react'
 
 const tabs = [
-  { to: '/book', label: '책', Icon: BookOpen },
-  { to: '/diary', label: '다이어리', Icon: Notebook },
+  { to: '/book', label: '일기책', Icon: BookOpen },
+  { to: '/analyze', label: '분석', Icon: ChartBar },
   { to: '/', label: '홈', Icon: House },
   { to: '/friend', label: '친구', Icon: UsersThree },
-  { to: '/my', label: '마이', Icon: UserCircle },
+  { to: '/setting', label: '설정', Icon: Gear },
 ]
 
 function BottomNav() {
@@ -21,7 +21,12 @@ function BottomNav() {
             isActive ? 'bottom-nav__item is-active' : 'bottom-nav__item'
           }
         >
-          {({ isActive }) => <Icon size={26} weight={isActive ? 'fill' : 'regular'} />}
+          {({ isActive }) => (
+            <>
+              <Icon size={26} weight={isActive ? 'fill' : 'regular'} />
+              <span>{label}</span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

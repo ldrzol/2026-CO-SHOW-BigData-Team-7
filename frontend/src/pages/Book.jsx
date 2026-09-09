@@ -1,7 +1,7 @@
 function Book() {
   return (
     <main>
-      <h1>책</h1>
+      <h1>일기책</h1>
     </main>
   )
 }

@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import Splash from './pages/Splash.jsx'
-import { Route, Routes } from 'react-router-dom'
+import Login from './pages/Login.jsx'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home.jsx'
-import Diary from './pages/Diary.jsx'
+import Analyze from './pages/Analyze.jsx'
 import Book from './pages/Book.jsx'
 import Friend from './pages/Friend.jsx'
-import My from './pages/My.jsx'
+import Setting from './pages/Setting.jsx'
+import Write from './pages/Write.jsx'
 
 import BottomNav from './components/BottomNav.jsx'
 
 function App() {
   const [showSplash, setShowSplash] = useState(true)
+  const location = useLocation()
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2500)
@@ -27,13 +30,15 @@ function App() {
       <main className="page">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/diary" element={<Diary />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/analyze" element={<Analyze />} />
           <Route path="/book" element={<Book />} />
           <Route path="/friend" element={<Friend />} />
-          <Route path="/my" element={<My />} />
+          <Route path="/setting" element={<Setting />} />
+          <Route path="/write" element={<Write />} />
         </Routes>
       </main>
-      <BottomNav />
+      {!['/login', '/write'].includes(location.pathname) && <BottomNav />}
     </>
   )
 }

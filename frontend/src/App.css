@@ -16,9 +16,12 @@
 .bottom-nav__item {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   color: var(--text);
   text-decoration: none;
+  font-size: 12px;
 }
 
 .bottom-nav__item.is-active {
@@ -40,4 +43,461 @@
 
 .splash img {
   width: 96px;
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.login__google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* 홈 화면 캘린더 설정 */
+.calendar {
+  margin: 16px 20px 0;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.calendar__header button {
+  display: flex;
+  border: none;
+  background: none;
+  color: var(--text-h);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.calendar__title {
+  margin: 0;
+  min-width: 140px;
+  text-align: center;
+}
+
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 8px;
+}
+
+.calendar__weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 8px;
+}
+
+.calendar__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 4;
+}
+
+.calendar__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 14px;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.calendar__day.is-outside {
+  background: none;
+  color: var(--border);
+}
+
+.calendar__day.has-entry {
+  background: var(--sub);
+  font-size: 20px;
+}
+
+.calendar__day.is-today {
+  box-shadow: 0 0 0 2px var(--accent);
+  background: var(--bg);
+}
+
+.calendar__day.is-selected {
+  background: var(--accent);
+  color: var(--text-h);
+}
+
+/* 홈 화면 일기 작성 버튼 */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 100px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--accent);
+  color: var(--text-h);
+  box-shadow: 0 6px 16px var(--accent-border), 0 2px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 홈 화면 일기 작성 설정*/
+.write {
+  padding: 0 20px 24px;
+}
+
+.write__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.write__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.write__title {
+  margin: 0;
+}
+
+.write__card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.write__date {
+  text-align: center;
+  color: var(--text);
+  margin: 0 0 16px;
+}
+
+.write__label {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+  margin: 16px 0 8px;
+}
+
+.write__weather,
+.write__moods {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.write__chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.write__chip.is-active {
+  background: var(--sub);
+  border-color: var(--accent);
+  color: var(--text-h);
+}
+
+.write__input,
+.write__textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  box-sizing: border-box;
+}
+
+.write__textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.write__moods {
+  gap: 12px;
+}
+
+.write__mood {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.write__mood.is-active {
+  background: var(--sub);
+  border-color: var(--accent);
+  color: var(--text-h);
+}
+
+.write__mood-emoji {
+  font-size: 22px;
+}
+
+.write__count {
+  text-align: right;
+  font-size: 12px;
+  color: var(--text);
+  margin: 6px 0 0;
+}
+
+.write__submit {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--text-h);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 설정 화면 */
+.setting {
+  padding: 0 20px 24px;
+}
+
+.setting__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.setting__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.setting__name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.setting__email {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.setting__card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.setting__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: var(--text-h);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.setting__card > :last-child {
+  border-bottom: none;
+}
+
+.setting__value {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.setting__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.setting__toggle-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.setting__toggle-label.is-on {
+  color: #22c55e;
+}
+
+.setting__toggle input {
+  display: none;
+}
+
+.setting__switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.15s;
+}
+
+.setting__switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+.setting__toggle input:checked + .setting__switch {
+  background: #22c55e;
+}
+
+.setting__toggle input:checked + .setting__switch::before {
+  transform: translateX(18px);
+}
+
+.setting__logout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.setting__logout-title {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.setting__logout-desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.setting__logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: #ef4444;
+  font: inherit;
+  cursor: pointer;
+}
+
+.setting__withdraw {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: #ef4444;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.setting__warning {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text);
+  margin: 12px 0 0;
+}
+
+.setting__logout-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
