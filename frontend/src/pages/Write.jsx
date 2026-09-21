@@ -11,8 +11,7 @@ const WEATHERS = [
 
 const MOODS = [
   { key: 'angry', label: '화남', emoji: '😠' },
-  { key: 'sleepy', label: '졸림', emoji: '😪' },
-  { key: 'lethargic', label: '무기력', emoji: '😑' },
+  { key: 'tired', label: '피곤함', emoji: '😪' },
   { key: 'excited', label: '신남', emoji: '🤩' },
   { key: 'sad', label: '슬픔', emoji: '😢' },
   { key: 'happy', label: '행복', emoji: '😊' },

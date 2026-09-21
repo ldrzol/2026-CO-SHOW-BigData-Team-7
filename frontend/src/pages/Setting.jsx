@@ -1,16 +1,23 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { signOut } from 'firebase/auth'
+import { auth } from '../lib/firebase.js'
 import { CaretRight, SignOut, Trash } from '@phosphor-icons/react'
 
-function Setting() {
+const SUB_PAGES = ['backup', 'storage', 'notice']
+
+function Setting({ profile }) {
+  const navigate = useNavigate()
   const [notifyOn, setNotifyOn] = useState(true)
 
   function handleSelect(key) {
-    // TODO: 각 설정 항목 화면으로 이동
+    if (SUB_PAGES.includes(key)) return navigate(`/setting/${key}`)
+    // TODO: 프로필·커스터마이징 화면으로 이동
     console.log(key)
   }
 
   function handleLogout() {
-    // TODO: Firebase 연동 후 signOut(auth) 호출
+    signOut(auth) // 로그아웃되면 App이 로그인 화면으로 보내줘요
   }
 
   function handleWithdraw() {
@@ -24,8 +31,8 @@ function Setting() {
       <button type="button" className="setting__profile" onClick={() => handleSelect('profile')}>
         <img className="setting__avatar" src="/icon-192.png" alt="" />
         <div>
-          <p className="setting__name">삐뚤이</p>
-          <p className="setting__email">preview@bbiddul.app</p>
+          <p className="setting__name">{profile.nickname}</p>
+          <p className="setting__email">{profile.email}</p>
         </div>
       </button>
 
