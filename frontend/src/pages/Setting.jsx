@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../lib/firebase.js'
-import { CaretRight, SignOut, Trash } from '@phosphor-icons/react'
+import { CaretRight, Crown, SignOut, Trash } from '@phosphor-icons/react'
 
 const SUB_PAGES = ['backup', 'storage', 'notice']
 
@@ -20,6 +20,10 @@ function Setting({ profile }) {
     signOut(auth) // 로그아웃되면 App이 로그인 화면으로 보내줘요
   }
 
+  function handleSubscribe() {
+    // TODO: 결제창으로 이동 → 결제 완료 시 프리미엄 활성화
+  }
+  
   function handleWithdraw() {
     // TODO: 회원탈퇴 처리 (데이터 초기화)
   }
@@ -35,6 +39,17 @@ function Setting({ profile }) {
           <p className="setting__email">{profile.email}</p>
         </div>
       </button>
+
+      <div className="setting__logout setting__premium">
+        <div>
+          <p className="setting__logout-title">프리미엄 구독</p>
+          <p className="setting__logout-desc">프리미엄 기능을 모두 사용할 수 있어요</p>
+        </div>
+        <button type="button" className="setting__premium-btn" onClick={handleSubscribe}>
+          <Crown size={16} weight="fill" />
+          구독하기
+        </button>
+      </div>
 
       <div className="setting__card">
         <button type="button" className="setting__row" onClick={() => handleSelect('customize')}>

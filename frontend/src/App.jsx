@@ -66,7 +66,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/analyze" element={<Analyze />} />
           <Route path="/book" element={<Book />} />
-          <Route path="/friend" element={<Friend />} />
+          <Route path="/friend" element={<Friend profile={profile} />} />
           <Route path="/setting" element={<Setting profile={profile} />} />
           <Route path="/setting/backup" element={<Backup />} />
           <Route path="/setting/storage" element={<Storage />} />

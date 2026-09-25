@@ -501,6 +501,7 @@
   flex-shrink: 0;
   white-space: nowrap;
 }
+
 /* 설정 하위 화면 (백업 / 저장공간 / 공지사항) */
 .sub {
   padding: 0 20px 24px;
@@ -563,6 +564,26 @@
 .setting__card > .notice:last-child .notice__body,
 .setting__card > .notice:last-child:not([open]) .notice__summary {
   border-bottom: none;
+}
+
+.setting__premium {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.setting__premium-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #08060d;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* 친구 화면 */
