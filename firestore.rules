@@ -18,6 +18,11 @@ service cloud.firestore {
         );
         allow delete: if request.auth != null && request.auth.uid in [uid, fid];
       }
+
+      // 일기: 본인만 읽고 쓸 수 있어요 (백업, 일기 저장에서 사용)
+      match /diaries/{did} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
     }
 
     // 문서 ID는 "보낸사람uid_받는사람uid"
@@ -28,6 +33,22 @@ service cloud.firestore {
         && request.resource.data.from == request.auth.uid
         && request.resource.data.from != request.resource.data.to
         && id == request.resource.data.from + '_' + request.resource.data.to;
+    }
+
+        // 알림 토큰: 본인만 (users 문서는 다른 사람도 읽을 수 있어서 따로 둬요)
+    match /pushTokens/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // 관리자 목록: 콘솔에서 직접 추가, 본인 여부만 확인할 수 있어요
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /notices/{id} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
   }
 }

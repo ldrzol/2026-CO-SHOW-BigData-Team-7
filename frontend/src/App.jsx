@@ -16,6 +16,7 @@ import Backup from './pages/Backup.jsx'
 import Storage from './pages/Storage.jsx'
 import Notice from './pages/Notice.jsx'
 import Write from './pages/Write.jsx'
+import Customize from './pages/Customize.jsx'
 
 import BottomNav from './components/BottomNav.jsx'
 
@@ -57,6 +58,7 @@ function App() {
   if (!user && !isLoginPage) return <Navigate to="/login" replace />
   if (user && isLoginPage) return <Navigate to="/" replace />
   if (user && !profile) return <Nickname user={user} onDone={setProfile} />
+  if (user && !profile.character) return <Customize user={user} profile={profile} onDone={setProfile} />
 
   return (
     <>
@@ -71,11 +73,12 @@ function App() {
           <Route path="/setting/backup" element={<Backup />} />
           <Route path="/setting/storage" element={<Storage />} />
           <Route path="/setting/notice" element={<Notice />} />
+          <Route path="/setting/customize" element={<Customize user={user} profile={profile} onDone={setProfile} />} />
           <Route path="/write" element={<Write />} />
         </Routes>
       </main>
-      {!['/login', '/write'].includes(location.pathname) && <BottomNav />}
-    </>
+      {!['/login', '/write', '/setting/customize'].includes(location.pathname) && <BottomNav />}
+      </>
   )
 }
 

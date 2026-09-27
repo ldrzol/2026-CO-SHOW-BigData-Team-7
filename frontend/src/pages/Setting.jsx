@@ -1,14 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../lib/firebase.js'
+import { disablePush, enablePush, isPushOn } from '../lib/push.js'
 import { CaretRight, Crown, SignOut, Trash } from '@phosphor-icons/react'
 
-const SUB_PAGES = ['backup', 'storage', 'notice']
+const PUSH_ERRORS = {
+  denied: '알림이 차단되어 있어요. 브라우저 설정에서 알림을 허용해주세요.',
+  unsupported: '이 기기에서는 알림을 쓸 수 없어요. 아이폰은 홈 화면에 앱을 추가한 뒤 사용할 수 있어요.',
+}
+
+const SUB_PAGES = ['backup', 'storage', 'notice', 'customize']
 
 function Setting({ profile }) {
   const navigate = useNavigate()
-  const [notifyOn, setNotifyOn] = useState(true)
+  const uid = auth.currentUser.uid
+  const [notifyOn, setNotifyOn] = useState(false)
+
+  useEffect(() => {
+    isPushOn(uid).then(setNotifyOn).catch(console.error)
+  }, [uid])
+
+  async function handleNotify(on) {
+    setNotifyOn(on)
+    try {
+      await (on ? enablePush(uid) : disablePush(uid))
+    } catch (e) {
+      console.error(e)
+      setNotifyOn(!on)
+      window.alert(PUSH_ERRORS[e.message] ?? '알림 설정에 실패했어요. 잠시 후 다시 시도해주세요.')
+    }
+  }
 
   function handleSelect(key) {
     if (SUB_PAGES.includes(key)) return navigate(`/setting/${key}`)
@@ -65,7 +87,7 @@ function Setting({ profile }) {
             <input
               type="checkbox"
               checked={notifyOn}
-              onChange={(e) => setNotifyOn(e.target.checked)}
+              onChange={(e) => handleNotify(e.target.checked)}
             />
             <span className="setting__switch" />
           </label>

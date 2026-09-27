@@ -9,12 +9,17 @@ function formatBytes(bytes) {
 
 function Storage() {
   const [usage, setUsage] = useState(null) // { used, quota } | null(측정 불가)
+  const [persisted, setPersisted] = useState(false)
 
   function measure() {
     navigator.storage?.estimate?.().then(({ usage: used, quota }) => setUsage({ used, quota }))
   }
 
   useEffect(measure, [])
+
+  useEffect(() => {
+    navigator.storage?.persisted?.().then(setPersisted)
+  }, [])
 
   async function handleClearCache() {
     if (!window.confirm('캐시를 삭제할까요? 일기 데이터는 삭제되지 않아요.')) return
@@ -43,6 +48,13 @@ function Storage() {
         ) : (
           <p className="setting__value">이 브라우저에서는 사용량을 확인할 수 없어요.</p>
         )}
+      </div>
+
+      <div className="setting__card">
+        <div className="setting__row">
+          <span>기기 데이터 보호</span>
+          <span className="setting__value">{persisted ? '보호됨' : '공간 부족 시 삭제될 수 있음'}</span>
+        </div>
       </div>
 
       <button type="button" className="write__submit" onClick={handleClearCache}>
