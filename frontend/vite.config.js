@@ -3,6 +3,9 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  // garu-ko resolves its local WASM/model assets relative to its module.
+  optimizeDeps: { exclude: ['garu-ko'] },
+  worker: { format: 'es' },
   server: {
     host: true,
   },

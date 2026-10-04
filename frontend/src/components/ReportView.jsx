@@ -26,7 +26,7 @@ const H = 180
 const PX = 30
 const PY = 36
 
-function LineChart({ slots, lo, hi, ticks, tip, title }) {
+function LineChart({ slots, lo, hi, ticks, tip, title, bottomGap = PY }) {
   const gradient = useId()
   const [open, setOpen] = useState(null)
 
@@ -40,7 +40,8 @@ function LineChart({ slots, lo, hi, ticks, tip, title }) {
   if (!slots.length) return <p className="analyze__empty">아직 기록이 없어요.</p>
 
   const x = (i) => (slots.length === 1 ? W / 2 : PX + (i * (W - PX * 2)) / (slots.length - 1))
-  const y = (v) => H - PY - ((v - lo) / (hi - lo)) * (H - PY * 2)
+  const height = H + bottomGap - PY
+  const y = (v) => height - bottomGap - ((v - lo) / (hi - lo)) * (H - PY * 2)
 
   // 값이 없는 구간에서는 선을 끊어요
   const lines = []
@@ -53,12 +54,12 @@ function LineChart({ slots, lo, hi, ticks, tip, title }) {
 
   return (
     <>
-      <svg viewBox={`0 0 ${W} ${H}`} className="chart" role="group" aria-label={title}>
+      <svg viewBox={`0 0 ${W} ${height}`} className="chart" role="group" aria-label={title}>
         <defs><linearGradient id={gradient} x1="0" y1={PY} x2="0" y2={H - PY} gradientUnits="userSpaceOnUse"><stop stopColor="#f6cc43" /><stop offset="1" stopColor="#b291d9" /></linearGradient></defs>
         {ticks.map(({ value, label, emotion }) => (
           <g key={label}>
             <line x1={PX - 10} y1={y(value)} x2={W - PX + 10} y2={y(value)} className="chart__grid" />
-            {emotion ? <image href={emotion === '행복' ? '/emotions/joy.png' : '/emotions/anxious.png'} x="0" y={y(value) - 12} width="24" height="24" aria-label={emotion} /> : <text x={5} y={y(value) + 4} className="chart__axis">{label}</text>}
+            {emotion ? <image href={emotion === '행복' ? '/emotions/joy.png' : '/emotions/negative.png'} x="0" y={y(value) - 12} width="24" height="24" aria-label={label} /> : <text x={5} y={y(value) + 4} className="chart__axis">{label}</text>}
           </g>
         ))}
         {lines.map((l) => (
@@ -86,7 +87,7 @@ function LineChart({ slots, lo, hi, ticks, tip, title }) {
           ),
         )}
         {slots.map((s, i) => (
-          <text key={s.label} x={x(i)} y={H - 2} textAnchor="middle" className="chart__axis">
+          <text key={s.label} x={x(i)} y={height - 2} textAnchor="middle" className="chart__axis">
             {s.label}
           </text>
         ))}
@@ -264,6 +265,7 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
         <LineChart
           key={`emotion-${kind}-${anchor}`}
           title="감정 변화 흐름"
+          bottomGap={64}
           slots={report.emotion}
           lo={-1}
           hi={1}
@@ -315,9 +317,10 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
           <p className="report-care-intro">마음에 작은 쉼표를 선물해 볼까요?</p>
           {care.map((r) => (
             <div key={r.start} className="analyze__care">
-              <EmotionIcon emotion={r.emotion} size={36} decorative /><p>
-                {r.start} ~ {r.end} · {r.emotion} 감정이 {r.days}일 이어졌어요
-              </p>
+              <EmotionIcon emotion={r.emotion} size={36} decorative /><div className="report-care-message">
+                <strong>{r.emotion} 감정이 {r.days}일 이어졌어요</strong>
+                <small><time dateTime={r.start}>{r.start.slice(5).replace('-', '/')}</time> ~ <time dateTime={r.end}>{r.end.slice(5).replace('-', '/')}</time></small>
+              </div>
               <button className="report-text-button" onClick={() => setDialog({ title: `${r.emotion}이 이어진 기록`, diaries: inPeriod(all, r) })}>기록 보기 →</button>
             </div>
           ))}

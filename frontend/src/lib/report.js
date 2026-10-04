@@ -167,41 +167,5 @@ export function careStreaks(allDiaries, { start, end }) {
   }
   return runs.filter((r) => NEGATIVE.includes(r.emotion) && r.days >= 3 && r.start <= end && r.end >= start)
 }
-/* A03 자주 나온 단어 — 출처는 사건이 아니라 선택 기간 일기 '본문'(제목 제외) */
-
-const STOPWORDS = new Set([
-  '그리고', '그래서', '하지만', '그런데', '오늘', '내일', '어제', '정말', '진짜', '너무', '조금',
-  '그냥', '다시', '많이', '이런', '저런', '그런', '이렇게', '그렇게', '때문', '생각', '하루', '우리',
-])
-
-// 긴 조사부터 떼어내요
-const PARTICLES = ['으로', '에서', '에게', '까지', '부터', '이랑', '하고', '보다', '처럼', '만큼', '이나', '라고',
-  '는', '은', '이', '가', '을', '를', '에', '의', '도', '와', '과', '로', '만']
-
-// ponytail: 형태소 분석기 없이 흔한 조사만 떼는 어림짐작이에요. 명사 추출기는 운영에서 교체
-function trimParticle(word) {
-  for (const p of PARTICLES) {
-    if (word.length > p.length + 1 && word.endsWith(p)) return word.slice(0, -p.length)
-  }
-  return word
-}
-
-export function wordCloud(periodDiaries, limit = 12) {
-  const found = new Map()
-  for (const d of periodDiaries) {
-    for (const raw of String(d.body ?? '').split(/[^가-힣a-zA-Z0-9]+/)) {
-      const word = trimParticle(raw)
-      if (word.length < 2 || STOPWORDS.has(word)) continue
-      const hit = found.get(word) ?? { word, count: 0, dates: [] }
-      hit.count += 1
-      if (!hit.dates.includes(d.diaryDate)) hit.dates.push(d.diaryDate)
-      found.set(word, hit)
-    }
-  }
-  // 빈도 내림차순, 동률은 한글 정렬
-  return [...found.values()]
-    .sort((a, b) => b.count - a.count || a.word.localeCompare(b.word, 'ko'))
-    .slice(0, limit)
-}
 export const previousPeriod = (kind, today = todayKey()) => shiftPeriod(kind, periodRange(kind, today).start, -1)
 export const normalizeDiary = (diary) => ({ ...diary, userEmotion: normalizeEmotion(diary.userEmotion) })

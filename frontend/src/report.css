@@ -1,6 +1,8 @@
+@import '@fontsource/gowun-dodum/400.css';
+
 /* 분석 제목·기간 선택·주간/월간 탭은 기존 App.css를 그대로 사용합니다. */
 .emotion-icon { object-fit: contain; vertical-align: middle; flex: none; }
-.report-body { --text: #817963; --text-h: #373326; --border: #eee9dc; --accent-bg: #fff9e7; --accent-border: #f4e6b5; --code-bg: #f7f4eb; --bg: #fff; color-scheme: light; color: var(--text); box-sizing: border-box; width: 100%; max-width: 500px; margin: 16px auto 0; padding: 16px 14px 24px; background: #fffdf3; border-radius: 24px; }
+.report-body { --text: #554c3e; --text-h: #373326; --border: #eee9dc; --accent-bg: #fff9e7; --accent-border: #f4e6b5; --code-bg: #f7f4eb; --bg: #fff; color-scheme: light; color: var(--text); box-sizing: border-box; width: 100%; max-width: 500px; margin: 16px auto 0; padding: 16px 14px 24px; background: #fffdf3; border-radius: 24px; }
 .report-body *, .evidence * { box-sizing: border-box; }
 .report-body button, .report-body a, .evidence button { font: inherit; -webkit-tap-highlight-color: transparent; }
 .report-body button { cursor: pointer; }
@@ -58,12 +60,12 @@
 .report__intro strong { font-size: 15px; color: #665329; }
 .report__summary { font-size: 13px; line-height: 1.95; margin: 16px 0; word-break: keep-all; }
 .report__pair { display: grid; gap: 8px; }
-.report__line { display: grid; gap: 6px; padding: 12px; border: 1px solid #f4e3ac; border-radius: 14px; background: #fff8dd; color: #89753f; text-align: left; font-size: 11px !important; }
+.report__line { display: grid; gap: 6px; padding: 12px; border: 1px solid #f4e3ac; border-radius: 14px; background: #fff8dd; color: #69552f; text-align: left; font-size: 11px !important; }
 .report__line b { display: flex; align-items: center; gap: 4px; color: #69572b; font-size: 12px; }
-.report__line.is-negative { background: #f7f3ff; border-color: #e8dff6; color: #89749e; }
+.report__line.is-negative { background: #f7f3ff; border-color: #e8dff6; color: #685576; }
 .report__line.is-negative b { color: #746182; }
 .report__sub { font-size: 13px; color: #746344; margin: 22px 0 8px; }
-.topic-row { display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: 0; padding: 12px 0; color: #786f59; text-align: left; font-size: 12px !important; }
+.topic-row { display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: 0; padding: 12px 0; color: #5b503d; text-align: left; font-size: 12px !important; }
 .topic-row + .topic-row { border-top: 1px solid #f5f1e6; }
 .topic-row > span:first-child { font-size: 20px; }
 .topic-row__name { flex: 1; min-width: 0; }
@@ -75,17 +77,18 @@
 .report__diff { display: flex; justify-content: space-between; font-size: 12px; padding: 8px 0; }
 .report__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .report__tags span { padding: 5px 10px; background: #fff6d7; border-radius: 999px; font-size: 11px; }
-.cloud { display: flex; justify-content: center; align-content: center; align-items: baseline; flex-wrap: wrap; gap: 7px 15px; min-height: 160px; padding: 12px; border-radius: 16px; background: radial-gradient(ellipse, #fff6cf, #fffdf5 65%); }
-.cloud__word { border: 0; background: none; color: #ad861f; font-weight: 750 !important; max-width: 100%; overflow-wrap: anywhere; line-height: 1.4; }
-.cloud__word:nth-child(3n) { color: #d4a638; }
-.cloud__word:nth-child(4n) { color: #8b6a22; }
+.cloud { position: relative; container-type: inline-size; width: 100%; margin: 8px 0; background: white; }
+.cloud__word { position: absolute; transform: translate(-50%, -50%); padding: 0; border: 0; background: transparent; color: #dca300; font-weight: 700 !important; white-space: nowrap; line-height: 1.35; }
+.cloud__word:nth-child(3n) { color: #ba901f; }
+.cloud__word:nth-child(4n) { color: #c49b26; }
+.cloud__word:hover { color: #946a00; }
 .matrix-wrap { overflow-x: auto; }
 .matrix { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 3px 7px; font-size: 10px; }
 .matrix th { font-weight: 500; color: #7f755e; }
 .matrix th span { display: block; font-size: 10px; white-space: nowrap; }
 .matrix th img { width: 25px; height: 25px; }
 .matrix td button { width: 100%; border: 0; border-radius: 7px; min-height: 34px; padding: 5px 0; color: #4b4336; font-size: 10px; }
-.evidence { --text-h: #373326; border: 1px solid #eee5cf; border-radius: 22px; padding: 0; width: min(440px, calc(100vw - 32px)); max-height: 80dvh; background: #fffdf5; color: #74664c; box-shadow: 0 20px 80px #31271933; }
+.evidence { --text-h: #373326; border: 1px solid #eee5cf; border-radius: 22px; padding: 0; width: min(440px, calc(100vw - 32px)); max-height: 80dvh; background: #fffdf5; color: #554c3e; box-shadow: 0 20px 80px #31271933; }
 .evidence::backdrop { background: #332c2159; }
 .evidence__panel { padding: 22px; }
 .evidence__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -124,3 +127,14 @@
   .report-body .analyze__tile strong { font-size: 18px; }
   .care-page { padding: 22px 14px; }
 }
+
+/* 분석과 마음 돌봄에 동일한 둥근 글꼴을 적용합니다. */
+.analyze, .report-body, .evidence { --sans: 'Gowun Dodum', sans-serif; --heading: 'Gowun Dodum', sans-serif; font-family: var(--sans); font-synthesis: weight; }
+.analyze button { font-family: inherit; }
+.report-body h2 { font-size: 17px; }
+.report__summary, .evidence__list p { font-size: 14px; color: #514737; }
+.care-activity p, .care-institution p { font-size: 13px; color: #514737; }
+.report-care-message { min-width: 0; display: grid; gap: 3px; }
+.report-care-message strong { font-size: 16px; font-weight: 700; color: #514737; line-height: 1.65; word-break: keep-all; }
+.report-care-message small { font-size: 12px; color: #76674f; }
+.topic-row__track i.is-happy { background: #f2a044; }

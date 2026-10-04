@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-import { axisSlots, careStreaks, emotionFlow, emotionRatio, longestStreak, periodRange, wordCloud } from './report.js'
+import { wordCloud } from './nounCloud.js'
+import { axisSlots, careStreaks, emotionFlow, emotionRatio, longestStreak, periodRange } from './report.js'
 import { assignEmotion, toApp5Scores } from './emotion.js'
 import { topicCounts, topicEmotionMatrix, topicEmotionRatio } from './aiReport.js'
 
@@ -52,8 +53,8 @@ assert.deepEqual(careStreaks([d('2026-08-01', '화남'), d('2026-08-02', '화남
 
 /* ---- A03 워드클라우드 ---- */
 
-// 조사를 떼고 세고, 빈도 내림차순 → 한글 정렬로 잘라요
-const cloud = wordCloud(
+// 형태소 분석으로 명사를 추출하고, 빈도 내림차순 → 한글 정렬로 잘라요
+const cloud = await wordCloud(
   [
     { diaryDate: '2026-08-01', body: '친구와 떡볶이를 먹었다. 떡볶이는 맛있다.' },
     { diaryDate: '2026-08-02', body: '친구가 게임을 하자고 했다.' },
@@ -64,8 +65,8 @@ assert.deepEqual(cloud.map((w) => w.word), ['떡볶이', '친구', '게임'])
 assert.equal(cloud[0].count, 2)
 assert.deepEqual(cloud[1].dates, ['2026-08-01', '2026-08-02'])
 
-// 한 글자·불용어는 빠져요
-assert.deepEqual(wordCloud([{ diaryDate: '2026-08-01', body: '오늘 나 는 참 그냥' }]), [])
+// 대명사·조사·부사는 빠져요
+assert.deepEqual(await wordCloud([{ diaryDate: '2026-08-01', body: '오늘 나 는 참 그냥' }]), [])
 
 /* ---- KOTE 44 → 5 매핑과 감정 부여 ---- */
 

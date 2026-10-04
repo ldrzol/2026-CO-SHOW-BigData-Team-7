@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { EMOTIONS, NEGATIVE, fmt1, inPeriod, periodLabel, periodRange, wordCloud } from '../lib/report.js'
+import { EMOTIONS, NEGATIVE, fmt1, inPeriod, periodLabel, periodRange } from '../lib/report.js'
 import { monthComparison, periodSummary, repeatedSituations, topicCounts, topicEmotionMatrix, topicEmotionRatio } from '../lib/aiReport.js'
 import { currentEvents } from '../lib/reportData.js'
+import NounCloud from './NounCloud.jsx'
 import EmotionIcon from './EmotionIcon.jsx'
 import EvidenceDialog from './EvidenceDialog.jsx'
 
@@ -19,13 +20,13 @@ export default function AiReportContent({ kind, anchor, diaries, events, ai, onR
     const allEvents = currentEvents(events, diaries)
     const selected = allEvents.filter((e) => e.diaryDate >= range.start && e.diaryDate <= range.end)
     return {
-      period, selected, words: wordCloud(period), summary: periodSummary(selected, kind),
+      period, selected, summary: periodSummary(selected, kind),
       situations: repeatedSituations(selected), topics: topicCounts(selected),
       happy: topicEmotionRatio(selected, ['행복']), hard: topicEmotionRatio(selected, NEGATIVE),
       matrix: topicEmotionMatrix(selected), month: kind === 'month' ? monthComparison(diaries, allEvents, anchor) : null,
     }
   }, [kind, anchor, diaries, events])
-  const { period, selected, words, summary, situations, topics, happy, hard, matrix, month } = data
+  const { period, selected, summary, situations, topics, happy, hard, matrix, month } = data
   const topCount = Math.max(1, ...topics.map((t) => t.count))
   if (!period.length) return <section className="analyze__card"><p className="analyze__empty">분석할 기록이 없어요.</p></section>
   return <div id="ai-report-content" className="report-ai">
@@ -55,8 +56,7 @@ export default function AiReportContent({ kind, anchor, diaries, events, ai, onR
     </section>}
     <section className="analyze__card">
       <h2>자주 나온 단어</h2>
-      {!words.length ? <p className="analyze__empty">표시할 단어가 없어요.</p> : <div className="cloud">{words.map((w, i) =>
-        <button key={w.word} className="cloud__word" style={{ fontSize: `${Math.max(14, 32 - i * 1.7)}px` }} onClick={() => setDialog({ title: `${w.word} · ${w.count}번 나왔어요`, diaries: period.filter((d) => w.dates.includes(d.diaryDate)) })}>{w.word}</button>)}</div>}
+      <NounCloud diaries={period} onSelect={(w) => setDialog({ title: `${w.word} · ${w.count}번 나왔어요`, diaries: period.filter((d) => w.dates.includes(d.diaryDate)) })} />
     </section>
     <section className="analyze__card">
       <h2>많이 이야기한 주제</h2>
