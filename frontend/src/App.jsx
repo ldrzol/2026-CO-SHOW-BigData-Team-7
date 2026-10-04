@@ -17,6 +17,8 @@ import Storage from './pages/Storage.jsx'
 import Notice from './pages/Notice.jsx'
 import Write from './pages/Write.jsx'
 import Customize from './pages/Customize.jsx'
+import AnalyzeDetail from './pages/AnalyzeDetail.jsx'
+import AnalyzeReport from './pages/AnalyzeReport.jsx'
 
 import BottomNav from './components/BottomNav.jsx'
 
@@ -64,17 +66,19 @@ function App() {
     <>
       <main className="page">
         <Routes>
+          <Route path="/analyze/detail" element={<AnalyzeDetail />} />
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/analyze" element={<Analyze />} />
+          <Route path="/analyze/report" element={<AnalyzeReport />} />
           <Route path="/book" element={<Book />} />
           <Route path="/friend" element={<Friend profile={profile} />} />
-          <Route path="/setting" element={<Setting profile={profile} />} />
+          <Route path="/setting" element={<Setting profile={profile} onProfileChange={setProfile} />} />
           <Route path="/setting/backup" element={<Backup />} />
           <Route path="/setting/storage" element={<Storage />} />
           <Route path="/setting/notice" element={<Notice />} />
           <Route path="/setting/customize" element={<Customize user={user} profile={profile} onDone={setProfile} />} />
-          <Route path="/write" element={<Write />} />
+          <Route path="/write" element={<Write profile={profile} />} />
         </Routes>
       </main>
       {!['/login', '/write', '/setting/customize'].includes(location.pathname) && <BottomNav />}

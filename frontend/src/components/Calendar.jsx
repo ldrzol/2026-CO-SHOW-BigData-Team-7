@@ -29,7 +29,7 @@ function getMonthGrid(year, month) {
   return cells
 }
 
-// entries: { '2026-09-05': '😊', ... }
+// entries: { '2026-09-05': '/emotions/joy.png', ... }
 // onDateClick: (dateKey) => void
 function Calendar({ entries = {}, onDateClick }) {
   const [viewDate, setViewDate] = useState(new Date())
@@ -84,7 +84,7 @@ function Calendar({ entries = {}, onDateClick }) {
                   outside && 'is-outside',
                 ].filter(Boolean).join(' ')}
               >
-                {emotion ?? date.getDate()}
+                {emotion ? <img src={emotion} alt="" className="calendar__emotion" /> : date.getDate()}
               </button>
             </div>
           )

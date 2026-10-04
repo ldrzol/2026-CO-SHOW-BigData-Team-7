@@ -1,0 +1,64 @@
+{
+  "version": "a0-team-setup-v0.1",
+  "purpose": "Restore the frozen A0-Paper inference assets; not training data or 44-to-6 mapping.",
+  "provenance": [
+    "reports/SOURCE_MANIFEST.json",
+    "reports/A0_RUNTIME_ASSET_MANIFEST.json",
+    "scripts/infer_a0_kote.py"
+  ],
+  "assets": [
+    {
+      "path": "models/raw_public/kote_for_meticulous_people/kote_pytorch_lightning.bin",
+      "url": "https://huggingface.co/searle-j/kote_for_meticulous_people/resolve/67c96315d45c6346d72459080c44b7e7401f765e/kote_pytorch_lightning.bin",
+      "size_bytes": 496040055,
+      "sha256": "AEA50FE96C2DBE3296C56E58A53865E0AFA56A34C45180C057ADBC0443924F88",
+      "source_commit": "67c96315d45c6346d72459080c44b7e7401f765e"
+    },
+    {
+      "path": "data/raw_public/kote/huggingface_dataset/kote.py",
+      "url": "https://huggingface.co/datasets/searle-j/kote/resolve/66f0eefe4b675a5d5411c7aa08e2c97fc9a9b17f/kote.py",
+      "size_bytes": 4033,
+      "sha256": "961D94BCFF24572B9BB735C8177F3AE182B586531FD292096EAEEE7563AA1CBA",
+      "source_commit": "66f0eefe4b675a5d5411c7aa08e2c97fc9a9b17f",
+      "download_size_bytes": 3903,
+      "download_sha256": "16200E362578B6845F992EDCD1924FE2BE25E9A2D3FD5625D0FC115342C93F0A",
+      "transform": "lf_to_crlf",
+      "transform_reason": "Restore the byte-identical Windows checkout used by the frozen evaluator. Verify remote LF bytes first, then verify final CRLF bytes. No label/code changes."
+    },
+    {
+      "path": "models/runtime_dependencies/kcelectra_base_v2021/config.json",
+      "url": "https://huggingface.co/beomi/KcELECTRA-base/resolve/5b4ca19e087a144c05a307ef109b3295aeae4588/config.json",
+      "size_bytes": 504,
+      "sha256": "8EBB21D03AFA6B51BF7A18C614EC60D0E4CE732428CE01F56E7604085EC99FC5",
+      "source_commit": "5b4ca19e087a144c05a307ef109b3295aeae4588"
+    },
+    {
+      "path": "models/runtime_dependencies/kcelectra_base_v2021/special_tokens_map.json",
+      "url": "https://huggingface.co/beomi/KcELECTRA-base/resolve/5b4ca19e087a144c05a307ef109b3295aeae4588/special_tokens_map.json",
+      "size_bytes": 124,
+      "sha256": "B3383B8739AE890383A6ED9AD871E592CC14D5B0C36FFDB9D3BE6E416256640A",
+      "source_commit": "5b4ca19e087a144c05a307ef109b3295aeae4588"
+    },
+    {
+      "path": "models/runtime_dependencies/kcelectra_base_v2021/tokenizer_config.json",
+      "url": "https://huggingface.co/beomi/KcELECTRA-base/resolve/5b4ca19e087a144c05a307ef109b3295aeae4588/tokenizer_config.json",
+      "size_bytes": 288,
+      "sha256": "B770F7717E85783B4DFAA813290901D35ADF9BABCBFE425F9B5FFFF9973DE99F",
+      "source_commit": "5b4ca19e087a144c05a307ef109b3295aeae4588"
+    },
+    {
+      "path": "models/runtime_dependencies/kcelectra_base_v2021/vocab.txt",
+      "url": "https://huggingface.co/beomi/KcELECTRA-base/resolve/5b4ca19e087a144c05a307ef109b3295aeae4588/vocab.txt",
+      "size_bytes": 396417,
+      "sha256": "AD0E13353A7B3697D064CFBD3EB42E4A986241F62A321BFD94659C65674AB687",
+      "source_commit": "5b4ca19e087a144c05a307ef109b3295aeae4588"
+    }
+  ],
+  "repository_files": [
+    {
+      "path": "scripts/reproduce_a0_kote.py",
+      "size_bytes": 38582,
+      "sha256": "316D3F30685FCE09402CC9FC27D9CF410F1478DAE1C81E080DFB0675BCA2F5E7"
+    }
+  ]
+}

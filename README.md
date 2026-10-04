@@ -65,7 +65,7 @@ npm run serve    # 에뮬레이터
 
 ## 배포
 
-Firebase 프로젝트: `ppittul-bc359`
+Firebase 프로젝트: `jbproject7-0705-c1d9`
 
 ```bash
 cd frontend && npm run build && cd ..

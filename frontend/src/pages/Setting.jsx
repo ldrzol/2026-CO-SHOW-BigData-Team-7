@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
-import { auth } from '../lib/firebase.js'
+import { doc, updateDoc } from 'firebase/firestore'
+import { auth, db } from '../lib/firebase.js'
 import { disablePush, enablePush, isPushOn } from '../lib/push.js'
-import { CaretRight, Crown, SignOut, Trash } from '@phosphor-icons/react'
+import { CaretRight, Crown, PencilSimple, SignOut, Trash } from '@phosphor-icons/react'
+import CharacterCanvas from '../components/CharacterCanvas.jsx'
 
 const PUSH_ERRORS = {
   denied: '알림이 차단되어 있어요. 브라우저 설정에서 알림을 허용해주세요.',
@@ -12,10 +14,13 @@ const PUSH_ERRORS = {
 
 const SUB_PAGES = ['backup', 'storage', 'notice', 'customize']
 
-function Setting({ profile }) {
+function Setting({ profile, onProfileChange }) {
   const navigate = useNavigate()
   const uid = auth.currentUser.uid
   const [notifyOn, setNotifyOn] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [nickname, setNickname] = useState(profile.nickname)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     isPushOn(uid).then(setNotifyOn).catch(console.error)
@@ -32,10 +37,30 @@ function Setting({ profile }) {
     }
   }
 
+  function startEdit() {
+    setNickname(profile.nickname)
+    setEditing(true)
+  }
+
+  async function handleNickname(e) {
+    e.preventDefault()
+    const next = nickname.trim()
+    if (next === profile.nickname) return setEditing(false)
+    setSaving(true)
+    try {
+      await updateDoc(doc(db, 'users', uid), { nickname: next })
+      onProfileChange({ ...profile, nickname: next })
+      setEditing(false)
+    } catch (err) {
+      console.error(err)
+      window.alert('닉네임 저장에 실패했어요. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   function handleSelect(key) {
     if (SUB_PAGES.includes(key)) return navigate(`/setting/${key}`)
-    // TODO: 프로필·커스터마이징 화면으로 이동
-    console.log(key)
   }
 
   function handleLogout() {
@@ -54,13 +79,39 @@ function Setting({ profile }) {
     <main className="setting">
       <h1>내 설정</h1>
 
-      <button type="button" className="setting__profile" onClick={() => handleSelect('profile')}>
-        <img className="setting__avatar" src="/icon-192.png" alt="" />
-        <div>
-          <p className="setting__name">{profile.nickname}</p>
-          <p className="setting__email">{profile.email}</p>
-        </div>
-      </button>
+      {editing ? (
+        <form className="setting__profile" onSubmit={handleNickname}>
+          <CharacterCanvas character={profile.character} face className="setting__avatar" />
+          <input
+            type="text"
+            className="setting__name-input"
+            maxLength={10}
+            required
+            autoFocus
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="최대 10자"
+            aria-label="닉네임"
+          />
+          <button type="button" className="setting__name-btn" onClick={() => setEditing(false)}>
+            취소
+          </button>
+          <button type="submit" className="setting__name-btn is-primary" disabled={saving || !nickname.trim()}>
+            {saving ? '저장 중' : '저장'}
+          </button>
+        </form>
+      ) : (
+        <button type="button" className="setting__profile" onClick={startEdit}>
+          <CharacterCanvas character={profile.character} face className="setting__avatar" />
+          <div className="setting__profile-text">
+            <p className="setting__name">
+              {profile.nickname}
+              <PencilSimple size={14} />
+            </p>
+            <p className="setting__email">{profile.email}</p>
+          </div>
+        </button>
+      )}
 
       <div className="setting__logout setting__premium">
         <div>

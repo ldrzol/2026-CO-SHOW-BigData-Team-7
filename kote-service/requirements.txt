@@ -1,0 +1,5 @@
+-r scripts/requirements-a0-cpu.txt
+
+fastapi==0.120.4
+uvicorn==0.38.0
+pydantic==2.12.3

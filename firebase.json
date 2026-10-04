@@ -1,12 +1,13 @@
 {
   "functions": {
-    "source": "backend"
+    "source": "backend",
+    "predeploy": ["npm --prefix backend run build"]
   },
   "firestore": {
     "rules": "firestore.rules"
   },
   "hosting": {
-    "site": "ppittul-bc359",
+    "site": "ppittul",
     "public": "frontend/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }]

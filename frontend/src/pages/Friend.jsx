@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { MagnifyingGlass, UserPlus, X } from '@phosphor-icons/react'
+import { ChatCircle, Heart, MagnifyingGlass, UserPlus, X } from '@phosphor-icons/react'
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
+  documentId,
+  getDoc,
   getDocs,
   limit,
   onSnapshot,
+  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -14,26 +18,161 @@ import {
   writeBatch,
 } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase.js'
+import { addDays, EMOTIONS, todayKey } from '../lib/report.js'
+import { DEFAULT_CHARACTER } from '../lib/character.js'
+import CharacterCanvas from '../components/CharacterCanvas.jsx'
 
-// TODO: 캐릭터 기능이 생기면 사용자별 이미지로 교체
-const CHARACTER = '/icon-192.png'
+// 커스터마이징 전 사용자도 있을 수 있어서 기본 캐릭터로 떨어뜨려요
+const Avatar = ({ character, className }) => (
+  <CharacterCanvas character={character ?? DEFAULT_CHARACTER} face className={className} />
+)
+
+// uid 로 그 사람의 캐릭터만 꺼내요 (users 문서는 로그인하면 누구나 읽을 수 있어요)
+const characterOf = (uid) => getDoc(doc(db, 'users', uid)).then((s) => s.data()?.character)
+
+// ponytail: 글마다 공감·댓글을 따로 구독해요. 피드가 길어지면 리스너가 늘어나니 그때 페이지네이션으로
+function FriendPost({ post, me, myNickname }) {
+  const base = `users/${post.uid}/diaries/${post.diaryDate}`
+  const [likes, setLikes] = useState([])
+  const [comments, setComments] = useState([])
+  const [text, setText] = useState('')
+  const [open, setOpen] = useState(false)
+
+  useEffect(
+    () =>
+      onSnapshot(
+        collection(db, base, 'likes'),
+        (snap) => setLikes(snap.docs.map((d) => d.id)),
+        console.error,
+      ),
+    [base],
+  )
+
+  useEffect(
+    () =>
+      onSnapshot(
+        query(collection(db, base, 'comments'), orderBy('createdAt')),
+        (snap) => setComments(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        console.error,
+      ),
+    [base],
+  )
+
+  const liked = likes.includes(me)
+
+  function toggleLike() {
+    const ref = doc(db, base, 'likes', me)
+    const run = liked ? deleteDoc(ref) : setDoc(ref, { createdAt: serverTimestamp() })
+    run.catch(console.error)
+  }
+
+  function addComment(e) {
+    e.preventDefault()
+    const body = text.trim()
+    if (!body) return
+    setText('')
+    addDoc(collection(db, base, 'comments'), {
+      uid: me,
+      nickname: myNickname,
+      body,
+      createdAt: serverTimestamp(),
+    }).catch(console.error)
+  }
+
+  return (
+    <article className="friend__post">
+      <div className="friend__post-head">
+        <Avatar character={post.character} className="friend__avatar is-sm" />
+        <div className="friend__name">
+          {post.nickname}
+          <p className="friend__sub">{post.diaryDate}</p>
+        </div>
+        <span className="friend__mood">
+          {EMOTIONS.find((e) => e.label === post.userEmotion)?.emoji}
+        </span>
+      </div>
+
+      {post.imageUrl && (
+        <div className="friend__picture">
+          <img src={post.imageUrl} alt="" />
+        </div>
+      )}
+      {post.title && <p className="friend__post-title">{post.title}</p>}
+      {post.body && <p className="friend__post-text">{post.body}</p>}
+      {post.aiComment && <p className="friend__sub">{post.aiComment}</p>}
+
+      <div className="friend__reactions">
+        <button
+          type="button"
+          className={liked ? 'is-liked' : ''}
+          aria-pressed={liked}
+          onClick={toggleLike}
+        >
+          <Heart size={20} weight={liked ? 'fill' : 'regular'} />
+          {likes.length}
+        </button>
+        <button type="button" onClick={() => setOpen(!open)}>
+          <ChatCircle size={20} />
+          {comments.length}
+        </button>
+      </div>
+
+      {open && (
+        <div className="friend__comments">
+          {comments.map((c) => (
+            <p key={c.id} className="friend__post-text">
+              <strong>{c.nickname}</strong> {c.body}
+              {(c.uid === me || post.uid === me) && (
+                <button
+                  type="button"
+                  className="friend__comment-del"
+                  aria-label="댓글 삭제"
+                  onClick={() => deleteDoc(doc(db, base, 'comments', c.id)).catch(console.error)}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </p>
+          ))}
+          <form className="friend__email" onSubmit={addComment}>
+            <input
+              value={text}
+              maxLength={200}
+              placeholder="댓글을 남겨보세요"
+              onChange={(e) => setText(e.target.value)}
+            />
+            <button type="submit" className="friend__btn is-primary" disabled={!text.trim()}>
+              등록
+            </button>
+          </form>
+        </div>
+      )}
+    </article>
+  )
+}
 
 function Friend({ profile }) {
   const me = auth.currentUser.uid
   const [tab, setTab] = useState('feed')
   const [friends, setFriends] = useState([])
   const [requests, setRequests] = useState([])
+  const [feed, setFeed] = useState([])
   const [filter, setFilter] = useState('')
   const [result, setResult] = useState() // undefined: 검색 전, null: 검색 결과 없음
   const [message, setMessage] = useState('')
   const addDialog = useRef(null)
 
-  // 내 친구 목록 (실시간)
+  // 내 친구 목록 (실시간) — 닉네임은 친구 문서에, 캐릭터는 상대 프로필에서
   useEffect(
     () =>
       onSnapshot(
         collection(db, 'users', me, 'friends'),
-        (snap) => setFriends(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        async (snap) =>
+          setFriends(
+            await Promise.all(
+              snap.docs.map(async (d) => ({ id: d.id, ...d.data(), character: await characterOf(d.id) })),
+            ),
+          ),
         console.error,
       ),
     [me],
@@ -44,11 +183,43 @@ function Friend({ profile }) {
     () =>
       onSnapshot(
         query(collection(db, 'friendRequests'), where('to', '==', me)),
-        (snap) => setRequests(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        async (snap) =>
+          setRequests(
+            await Promise.all(
+              snap.docs.map(async (d) => ({
+                id: d.id,
+                ...d.data(),
+                character: await characterOf(d.data().from),
+              })),
+            ),
+          ),
         console.error,
       ),
     [me],
   )
+
+  // 친구들의 '친구 공개' 일기 — 최근 90일치만 모아요
+  useEffect(() => {
+    if (!friends.length) return setFeed([])
+    const since = addDays(todayKey(), -90) // 문서 ID 가 날짜라 ID 범위로 자를 수 있어요
+    Promise.all(
+      friends.map(({ id, nickname, character }) =>
+        getDocs(
+          query(
+            collection(db, 'users', id, 'diaries'),
+            where('visibility', '==', 'friends'),
+            where(documentId(), '>=', since),
+          ),
+        ).then((snap) =>
+          snap.docs.map((d) => ({ key: `${id}_${d.id}`, uid: id, nickname, character, ...d.data() })),
+        ),
+      ),
+    )
+      .then((all) =>
+        setFeed(all.flat().filter((d) => !d.isDeleted).sort((a, b) => b.diaryDate.localeCompare(a.diaryDate))),
+      )
+      .catch(console.error)
+  }, [friends])
 
   async function handleSearch(e) {
     e.preventDefault()
@@ -143,7 +314,7 @@ function Friend({ profile }) {
         {result === null && <p className="friend__sub">해당 이메일의 사용자가 없어요.</p>}
         {result && (
           <div className="friend__row friend__result">
-            <img className="friend__avatar is-sm" src={CHARACTER} alt="" />
+            <Avatar character={result.character} className="friend__avatar is-sm" />
             <div className="friend__name">
               {result.nickname}
               <p className="friend__sub">{result.email}</p>
@@ -163,12 +334,12 @@ function Friend({ profile }) {
 
       <div className="friend__stories">
         <div className="friend__story">
-          <img className="friend__avatar is-me" src={CHARACTER} alt="" />
+          <Avatar character={profile.character} className="friend__avatar is-me" />
           <span>내 캐릭터</span>
         </div>
-        {friends.map(({ id, nickname }) => (
+        {friends.map(({ id, nickname, character }) => (
           <div key={id} className="friend__story">
-            <img className="friend__avatar" src={CHARACTER} alt="" />
+            <Avatar character={character} className="friend__avatar" />
             <span>{nickname}</span>
           </div>
         ))}
@@ -192,8 +363,13 @@ function Friend({ profile }) {
       </div>
 
       {tab === 'feed' ? (
-        // TODO: 일기 저장 기능이 생기면 친구들의 일기를 불러와서 보여주기
-        <p className="friend__section">아직 친구 일기가 없어요.</p>
+        feed.length === 0 ? (
+          <p className="friend__section">아직 친구 일기가 없어요.</p>
+        ) : (
+          feed.map((d) => (
+            <FriendPost key={d.key} post={d} me={me} myNickname={profile.nickname} />
+          ))
+        )
       ) : (
         <>
           <label className="friend__search">
@@ -212,7 +388,7 @@ function Friend({ profile }) {
               <div className="setting__card">
                 {requests.map((req) => (
                   <div key={req.id} className="friend__row">
-                    <img className="friend__avatar is-sm" src={CHARACTER} alt="" />
+                    <Avatar character={req.character} className="friend__avatar is-sm" />
                     <span className="friend__name">{req.fromNickname}</span>
                     <button type="button" className="friend__btn is-primary" onClick={() => accept(req)}>
                       수락
@@ -231,7 +407,7 @@ function Friend({ profile }) {
             <div className="setting__card">
               {shownFriends.map((friend) => (
                 <div key={friend.id} className="friend__row">
-                  <img className="friend__avatar is-sm" src={CHARACTER} alt="" />
+                  <Avatar character={friend.character} className="friend__avatar is-sm" />
                   <span className="friend__name">{friend.nickname}</span>
                   <button type="button" className="friend__btn" onClick={() => removeFriend(friend)}>
                     삭제

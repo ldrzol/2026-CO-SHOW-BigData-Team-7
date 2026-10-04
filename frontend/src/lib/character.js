@@ -9,7 +9,7 @@ const CLOTH_COLORS = ['#ffffff', '#ff8a80', '#ffd166', '#8ad18b', '#7fb8ff', '#b
 // view: 썸네일에서 보여줄 영역 [중심x, 중심y, 한 변] (1000x1000 기준)
 export const TABS = [
   { key: 'skin', label: '피부', colorKey: 'skin', colors: SKIN_COLORS },
-  { key: 'eye', label: '눈', files: numbered('eye', 5), colorKey: 'eyeColor', colors: EYE_COLORS, mode: 'ink', view: [502, 598, 420] },
+  { key: 'eye', label: '눈', files: numbered('eye', 4), colorKey: 'eyeColor', colors: EYE_COLORS, mode: 'ink', view: [502, 598, 420] },
   { key: 'eyebrow', label: '눈썹', files: numbered('eyebrow', 3), colorKey: 'hairColor', colors: HAIR_COLORS, mode: 'ink', view: [502, 478, 500] },
   { key: 'nose', label: '코', files: ['nose', 'nose2', 'nose3'], view: [502, 710, 160] },
   { key: 'mouth', label: '입', files: numbered('mouse', 6), view: [502, 815, 150] },
@@ -62,6 +62,19 @@ export function thumbLayers(c, tab, file, size) {
   const [cx, cy, side] = tab.view
   const s = size / side
   return [{ file, box: [-(cx - side / 2) * s, -(cy - side / 2) * s, 1000 * s, 1000 * s], color: c[tab.colorKey], mode: tab.mode }]
+}
+
+// 프로필용 얼굴만: 몸 레이어는 빼고 머리 부분을 size x size 에 꽉 차게
+const FACE_VIEW = [200, 112, 200] // 400x400 기준 [중심x, 중심y, 한 변]
+export function faceLayers(c, size) {
+  const [cx, cy, side] = FACE_VIEW
+  const s = size / side
+  return characterLayers(c)
+    .filter((l) => l.box !== BODY)
+    .map((l) => {
+      const [x, y, w, h] = l.box
+      return { ...l, box: [(x - (cx - side / 2)) * s, (y - (cy - side / 2)) * s, w * s, h * s] }
+    })
 }
 
 const images = {}
