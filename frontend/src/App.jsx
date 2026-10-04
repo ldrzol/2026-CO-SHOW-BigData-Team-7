@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import './report.css'
 import Splash from './pages/Splash.jsx'
 import Login from './pages/Login.jsx'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { auth, db } from './lib/firebase.js'
 import Nickname from './pages/Nickname.jsx'
 import Home from './pages/Home.jsx'
 import Analyze from './pages/Analyze.jsx'
+import CareGuide from './pages/CareGuide.jsx'
 import Book from './pages/Book.jsx'
 import Friend from './pages/Friend.jsx'
 import Setting from './pages/Setting.jsx'
@@ -70,6 +72,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/analyze" element={<Analyze />} />
+          <Route path="/analyze/care" element={<CareGuide />} />
           <Route path="/analyze/report" element={<AnalyzeReport />} />
           <Route path="/book" element={<Book />} />
           <Route path="/friend" element={<Friend profile={profile} />} />

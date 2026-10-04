@@ -5,6 +5,7 @@ import { doc, increment, serverTimestamp, setDoc } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { auth, db, functions } from '../lib/firebase.js'
 import { characterLayers, loadImage, paint } from '../lib/character.js'
+import EmotionIcon from '../components/EmotionIcon.jsx'
 import { EMOTIONS, todayKey } from '../lib/report.js'
 
 const WEATHERS = [
@@ -160,14 +161,14 @@ function Write({ profile }) {
 
         <label className="write__label">오늘 기분</label>
         <div className="write__moods">
-          {EMOTIONS.map(({ key, label, emoji }) => (
+          {EMOTIONS.map(({ key, label }) => (
             <button
               key={key}
               type="button"
               className={emotion === label ? 'write__mood is-active' : 'write__mood'}
               onClick={() => setEmotion(label)}
             >
-              <span className="write__mood-emoji">{emoji}</span>
+              <EmotionIcon emotion={label} size={40} decorative />
               {label}
             </button>
           ))}

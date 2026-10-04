@@ -1,15 +1,14 @@
 // KOTE 44 → 앱 5감정 — MAPPING_RULES_V0_3.json / REPORT_ASSIGNMENT_RULE_V0_1.json 기준
-export const EMOTION_ORDER = ['기쁨', '평온함', '피곤함', '슬픔', '화남']
+export const EMOTION_ORDER = ['행복', '피곤함', '슬픔', '화남', '불안함']
 
 // 연결된 KOTE 라벨 ID. 10 안타까움/실망은 자동 점수에서 계속 제외해요
-// 평온함(14 편안/쾌적, 43 안심/신뢰)은 전달본이 '행복이 흡수하지 않는다'고 비워둔 라벨을 씁니다
-// 18 공포/무서움, 41 불안/걱정은 감정 5개를 이 목록으로 정하면서 어느 범주에도 들어가지 않아요
+// 14 편안/쾌적, 43 안심/신뢰는 행복으로 흡수하지 않아요.
 export const APP5_MAPPING = {
-  기쁨: [13, 32, 40, 42, 28],
-  평온함: [14, 43],
+  행복: [13, 32, 40, 42, 28],
   피곤함: [27],
   슬픔: [5, 19, 36],
   화남: [0, 6, 22],
+  불안함: [18, 41],
 }
 
 // 연결된 라벨 점수의 최댓값. 합계 100% 로 정규화하지 않고 확률로 읽지 않아요
@@ -26,8 +25,19 @@ export function assignEmotion(scores) {
   )
   const [s1, s2] = sorted
   const tied = sorted.filter((x) => x.score === s1.score).length > 1
-  if (tied || s1.score < 0.7 || s1.score - s2.score < 0.2) {
+  if (tied || s1.score < 0.7 || s1.score - s2.score < 0.2 - 1e-12) {
     return { emotionDecisionStatus: 'withheld', representativeEmotion: null }
   }
   return { emotionDecisionStatus: 'assigned', representativeEmotion: s1.emotion }
+}
+// 기존 표현만 호환하며 평온함을 다른 감정으로 바꾸지 않습니다.
+export const normalizeEmotion = (label) => ['기쁨', '신남'].includes(label) ? '행복' : label
+
+// 기존 문서는 보존하고, 저장된 44개 원점수를 현재 기준으로 다시 계산해 표시합니다.
+export function reportEvent(event) {
+  const raw = event.probabilities44
+  const valid = raw && Array.from({ length: 44 }, (_, i) => raw[i]).every((v) => Number.isFinite(v) && v >= 0 && v <= 1)
+  if (valid) return { ...event, ...assignEmotion(toApp5Scores(raw)) }
+  const label = normalizeEmotion(event.representativeEmotion)
+  return { ...event, representativeEmotion: EMOTION_ORDER.includes(label) ? label : null }
 }

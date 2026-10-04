@@ -16,15 +16,15 @@ const EVENT_RULES = readFileSync(join(PROMPTS, "EVENT_DEFINITION_V0_1.md"), "utf
 const TOPIC_PROMPT = readFileSync(join(PROMPTS, "EVENT_TOPIC_CLASSIFICATION_PROMPT_V0_1.md"), "utf8");
 
 // 연결된 KOTE 라벨 ID. frontend/src/lib/emotion.js 와 같은 표를 씁니다
-// 10 안타까움/실망은 자동 점수에서 제외, 18 공포·41 불안/걱정은 어느 범주에도 넣지 않아요
+// 공식 v0.3: 10 안타까움/실망, 14 편안/쾌적, 43 안심/신뢰는 제외해요
 const APP5: Record<string, number[]> = {
-  기쁨: [13, 32, 40, 42, 28],
-  평온함: [14, 43],
+  행복: [13, 32, 40, 42, 28],
   피곤함: [27],
   슬픔: [5, 19, 36],
   화남: [0, 6, 22],
+  불안함: [18, 41],
 };
-const ORDER = ["기쁨", "평온함", "피곤함", "슬픔", "화남"];
+const ORDER = ["행복", "피곤함", "슬픔", "화남", "불안함"];
 
 // 추출·매칭 로직이 바뀌면 올려요 (frontend/src/lib/aiReport.js 와 같은 값)
 const PIPELINE_VERSION = "v2";
@@ -34,7 +34,7 @@ function assign(p44: number[]) {
   const scores5 = Object.fromEntries(ORDER.map((e) => [e, Math.max(...APP5[e].map((i) => p44[i] ?? 0))]));
   const sorted = ORDER.map((e) => ({ e, s: scores5[e] })).sort((a, b) => b.s - a.s);
   const tied = sorted.filter((x) => x.s === sorted[0].s).length > 1;
-  const ok = !tied && sorted[0].s >= 0.7 && sorted[0].s - sorted[1].s >= 0.2;
+  const ok = !tied && sorted[0].s >= 0.7 && sorted[0].s - sorted[1].s >= 0.2 - 1e-12;
   return {
     scores5,
     emotionDecisionStatus: ok ? "assigned" : "withheld",
