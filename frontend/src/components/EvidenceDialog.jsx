@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export default function EvidenceDialog({ title, events = [], diaries = [], onClose }) {
+export default function EvidenceDialog({ title, events = [], diaries = [], hideDiaryTitles = false, onClose }) {
   const dialog = useRef(null)
   useEffect(() => {
     const previous = document.activeElement
@@ -16,7 +16,7 @@ export default function EvidenceDialog({ title, events = [], diaries = [], onClo
         {!events.length && !diaries.length && <p className="analyze__empty">해당하는 기록이 없어요.</p>}
         <ul className="evidence__list">
           {events.map((e) => <li key={e.eventId ?? e.id}><small>{e.diaryDate}</small><p>{e.evidenceText}</p></li>)}
-          {diaries.map((d) => <li key={d.diaryDate}><small>{d.diaryDate} · {d.userEmotion}</small><h3>{d.title || '제목 없는 일기'}</h3><p>{d.body}</p></li>)}
+          {diaries.map((d) => <li key={d.diaryDate}><small>{d.diaryDate} · {d.userEmotion}</small>{!hideDiaryTitles && <h3>{d.title || '제목 없는 일기'}</h3>}<p>{d.body}</p></li>)}
         </ul>
       </div>
     </dialog>

@@ -65,7 +65,7 @@
 .report__line.is-negative { background: #f7f3ff; border-color: #e8dff6; color: #685576; }
 .report__line.is-negative b { color: #746182; }
 .report__sub { font-size: 13px; color: #746344; margin: 22px 0 8px; }
-.topic-row { display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: 0; padding: 12px 0; color: #5b503d; text-align: left; font-size: 12px !important; }
+.topic-row { display: flex; width: 100%; align-items: center; gap: 8px; background: transparent; border: 0; padding: 12px 0; color: #5b503d; text-align: left; font-size: 14px !important; }
 .topic-row + .topic-row { border-top: 1px solid #f5f1e6; }
 .topic-row > span:first-child { font-size: 20px; }
 .topic-row__name { flex: 1; min-width: 0; }
@@ -73,21 +73,21 @@
 .topic-row__track { width: 35%; height: 8px; background: #faf5e8; border-radius: 6px; overflow: hidden; }
 .topic-row__track i { display: block; height: 100%; background: #f2cf69; border-radius: inherit; }
 .topic-row__track i.is-hard { background: #bba0d5; }
-.topic-row b { min-width: 32px; font-size: 11px; text-align: right; }
+.topic-row b { min-width: 36px; font-size: 13px; text-align: right; }
 .report__diff { display: flex; justify-content: space-between; font-size: 12px; padding: 8px 0; }
 .report__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .report__tags span { padding: 5px 10px; background: #fff6d7; border-radius: 999px; font-size: 11px; }
 .cloud { position: relative; container-type: inline-size; width: 100%; margin: 8px 0; background: white; }
-.cloud__word { position: absolute; transform: translate(-50%, -50%); padding: 0; border: 0; background: transparent; color: #dca300; font-weight: 700 !important; white-space: nowrap; line-height: 1.35; }
-.cloud__word:nth-child(3n) { color: #ba901f; }
-.cloud__word:nth-child(4n) { color: #c49b26; }
-.cloud__word:hover { color: #946a00; }
+.cloud__word { position: absolute; transform: translate(-50%, -50%); padding: 0; border: 0; background: transparent; color: #e98524; font-weight: 700 !important; white-space: nowrap; line-height: 1.35; }
+.cloud__word:nth-child(3n) { color: #cc7220; }
+.cloud__word:nth-child(4n) { color: #ec9d48; }
+.cloud__word:hover { color: #a94f14; }
 .matrix-wrap { overflow-x: auto; }
-.matrix { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 3px 7px; font-size: 10px; }
+.matrix { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 3px 7px; font-size: 12px; }
 .matrix th { font-weight: 500; color: #7f755e; }
-.matrix th span { display: block; font-size: 10px; white-space: nowrap; }
+.matrix th span { display: block; font-size: 12px; white-space: nowrap; }
 .matrix th img { width: 25px; height: 25px; }
-.matrix td button { width: 100%; border: 0; border-radius: 7px; min-height: 34px; padding: 5px 0; color: #4b4336; font-size: 10px; }
+.matrix td button { width: 100%; border: 0; border-radius: 7px; min-height: 34px; padding: 5px 0; color: #4b4336; font-size: 12px; }
 .evidence { --text-h: #373326; border: 1px solid #eee5cf; border-radius: 22px; padding: 0; width: min(440px, calc(100vw - 32px)); max-height: 80dvh; background: #fffdf5; color: #554c3e; box-shadow: 0 20px 80px #31271933; }
 .evidence::backdrop { background: #332c2159; }
 .evidence__panel { padding: 22px; }
@@ -138,3 +138,9 @@
 .report-care-message strong { font-size: 16px; font-weight: 700; color: #514737; line-height: 1.65; word-break: keep-all; }
 .report-care-message small { font-size: 12px; color: #76674f; }
 .topic-row__track i.is-happy { background: #f2a044; }
+
+.chart-container { position: relative; }
+.chart-popover { position: absolute; z-index: 2; width: min(150px, 44%); padding: 9px 10px; border: 1px solid #efd7a8; border-radius: 12px; background: #fffaf0; color: #665136; box-shadow: 0 4px 14px #75532318; text-align: left; pointer-events: none; }
+.chart-popover__date { display: block; font-size: 11px; line-height: 1.6; }
+.chart-popover strong { display: block; margin-top: 3px; font-size: 13px; line-height: 1.6; word-break: keep-all; }
+.chart-popover button { position: absolute; top: -8px; right: -7px; width: 22px; height: 22px; display: grid; place-items: center; padding: 0; border: 1px solid #efd7a8; border-radius: 50%; background: #fffaf0; color: #71552c; font-size: 15px; pointer-events: auto; }

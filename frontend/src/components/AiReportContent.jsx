@@ -56,7 +56,7 @@ export default function AiReportContent({ kind, anchor, diaries, events, ai, onR
     </section>}
     <section className="analyze__card">
       <h2>자주 나온 단어</h2>
-      <NounCloud diaries={period} onSelect={(w) => setDialog({ title: `${w.word} · ${w.count}번 나왔어요`, diaries: period.filter((d) => w.dates.includes(d.diaryDate)) })} />
+      <NounCloud diaries={period} onSelect={(w) => setDialog({ title: `${w.word} · ${w.count}번 나왔어요`, hideDiaryTitles: true, diaries: period.filter((d) => w.dates.includes(d.diaryDate)) })} />
     </section>
     <section className="analyze__card">
       <h2>많이 이야기한 주제</h2>

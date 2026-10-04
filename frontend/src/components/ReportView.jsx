@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import EmotionIcon from './EmotionIcon.jsx'
@@ -28,13 +28,16 @@ const PY = 36
 
 function LineChart({ slots, lo, hi, ticks, tip, title, bottomGap = PY }) {
   const gradient = useId()
+  const container = useRef(null)
   const [open, setOpen] = useState(null)
 
   useEffect(() => {
     if (open === null) return
     const close = (e) => e.key === 'Escape' && setOpen(null)
+    const outside = (e) => { if (!container.current?.contains(e.target)) setOpen(null) }
     window.addEventListener('keydown', close)
-    return () => window.removeEventListener('keydown', close)
+    document.addEventListener('pointerdown', outside)
+    return () => { window.removeEventListener('keydown', close); document.removeEventListener('pointerdown', outside) }
   }, [open])
 
   if (!slots.length) return <p className="analyze__empty">아직 기록이 없어요.</p>
@@ -52,8 +55,10 @@ function LineChart({ slots, lo, hi, ticks, tip, title, bottomGap = PY }) {
     }
   })
 
+  const selected = open !== null ? slots[open] : null
+  const date = (key) => key.slice(5).replace('-', '/')
   return (
-    <>
+    <div className="chart-container" ref={container}>
       <svg viewBox={`0 0 ${W} ${height}`} className="chart" role="group" aria-label={title}>
         <defs><linearGradient id={gradient} x1="0" y1={PY} x2="0" y2={H - PY} gradientUnits="userSpaceOnUse"><stop stopColor="#f6cc43" /><stop offset="1" stopColor="#b291d9" /></linearGradient></defs>
         {ticks.map(({ value, label, emotion }) => (
@@ -73,6 +78,8 @@ function LineChart({ slots, lo, hi, ticks, tip, title, bottomGap = PY }) {
               tabIndex={0}
               className="chart__point"
               aria-label={`${title} ${s.label} 기록 보기`}
+              aria-expanded={open === i}
+              aria-describedby={open === i ? `${gradient}-tip` : undefined}
               onClick={() => setOpen(open === i ? null : i)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -92,15 +99,18 @@ function LineChart({ slots, lo, hi, ticks, tip, title, bottomGap = PY }) {
           </text>
         ))}
       </svg>
-      {open !== null && slots[open] && (
-        <p className="chart__tip">
-          {tip(slots[open])}
-          <button type="button" className="chart__tip-close" onClick={() => setOpen(null)} aria-label="닫기">
-            ✕
-          </button>
-        </p>
+      {selected && (
+        <div id={`${gradient}-tip`} className="chart-popover" role="status" style={{
+          left: `${x(open) / W * 100 + (x(open) <= W / 2 ? 3 : -3)}%`,
+          top: `clamp(48px, ${y(selected.value) / height * 100}%, calc(100% - 48px))`,
+          transform: `translate(${x(open) <= W / 2 ? '0' : '-100%'}, -50%)`,
+        }}>
+          <span className="chart-popover__date">{date(selected.keys[0])}{selected.keys.length > 1 ? ` ~ ${date(selected.keys.at(-1))}` : ''}</span>
+          <strong>{tip(selected)}</strong>
+          <button type="button" onClick={() => setOpen(null)} aria-label={`${title} 설명 닫기`}>×</button>
+        </div>
       )}
-    </>
+    </div>
   )
 }
 
@@ -270,7 +280,7 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
           lo={-1}
           hi={1}
           ticks={emotionTicks}
-          tip={(s) => `${s.keys[0]}${kind === 'month' ? ` ~ ${s.keys.at(-1)}` : ''} · ${s.diaries.map((d) => d.userEmotion).join(', ') || '자료 없음'}`}
+          tip={(s) => [...new Set(s.diaries.map((d) => d.userEmotion))].join(' · ') || '자료 없음'}
         />
       </section>
 
@@ -284,7 +294,7 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
           lo={1}
           hi={5}
           ticks={[{ value: 5, label: '5' }, { value: 3, label: '3' }, { value: 1, label: '1' }]}
-          tip={(s) => `${s.keys[0]}${kind === 'month' ? ` ~ ${s.keys.at(-1)}` : ''} · ${fmt1(s.value)}점${kind === 'month' ? ' (구간 평균)' : ''}`}
+          tip={(s) => `${fmt1(s.value)}점${kind === 'month' ? ' (평균)' : ''}`}
         />
       </section>
 

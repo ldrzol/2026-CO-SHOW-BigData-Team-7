@@ -20,11 +20,13 @@ test('빈도는 실제 등장 횟수, 근거 날짜는 중복 제거', async () 
 test('같은 빈도·긴 명사 12개도 겹치거나 영역 밖으로 벗어나지 않음', () => {
   for (const entries of [
     ['발표', '가족', '게임', '친구', '잠', '병원', '휴식'],
+    ['걱정', '고민', '발표', '산책', '친구', '업무', '부족', '순서', '공원', '마음', '음악', '일'],
     Array.from({ length: 12 }, (_, i) => `긴프로젝트단어${i}`),
   ]) {
     const input = entries.map((word, i) => ({ word, count: entries.length === 12 ? 3 : 9 - i }))
     const layout = cloudLayout(input)
     assert.equal(layout.words.length, entries.length)
+    assert.equal(layout.height, 270, '공간이 부족해도 높이가 늘어나지 않아야 함')
     for (const [i, a] of layout.words.entries()) {
       assert.ok(a.x - a.width / 2 >= 0 && a.x + a.width / 2 <= layout.width)
       assert.ok(a.y - a.height / 2 >= 0 && a.y + a.height / 2 <= layout.height)
