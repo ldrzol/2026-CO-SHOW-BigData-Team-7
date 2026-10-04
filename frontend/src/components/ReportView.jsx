@@ -347,7 +347,7 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
         {!status.count ? <p className="analyze__empty">분석할 기록이 없어요.</p> : aiOpen ?
           <button className="analyze__ghost" aria-expanded="true" aria-controls="ai-report-content" onClick={() => setAiOpen(false)}>AI 리포트 접기</button> : notice ?
           <div className="report-access"><p>AI 리포트는 1회 무료로 볼 수 있고, 이후에는 월간 구독이 필요해요.</p><button className="report-primary" onClick={openAi}>안내 확인하고 보고서 보기</button><button className="report-text-button" onClick={() => setNotice(false)}>닫기</button></div> :
-          <button className="report-primary" aria-expanded="false" onClick={() => setNotice(true)}>AI 리포트 보기 <span>↗</span></button>}
+          <button className="report-primary" aria-expanded="false" onClick={() => setNotice(true)}>AI 리포트 보기</button>}
       </section>
       {aiOpen && <AiReportContent key={`${kind}-${anchor}`} kind={kind} anchor={anchor} diaries={all} events={events} ai={ai} onRetry={() => loadAi(periodRange(kind, anchor))} />}
       </>}

@@ -129,7 +129,7 @@
 }
 
 /* 분석과 마음 돌봄에 동일한 둥근 글꼴을 적용합니다. */
-.analyze, .report-body, .evidence { --sans: 'Gowun Dodum', sans-serif; --heading: 'Gowun Dodum', sans-serif; font-family: var(--sans); font-synthesis: weight; }
+.analyze, .report-body, .evidence { --sans: var(--report-font, 'Gowun Dodum'), sans-serif; --heading: var(--report-heading-font, var(--report-font, 'Gowun Dodum')), sans-serif; font-family: var(--sans); font-synthesis: weight; }
 .analyze button { font-family: inherit; }
 .report-body h2 { font-size: 17px; }
 .report__summary, .evidence__list p { font-size: 14px; color: #514737; }
@@ -140,7 +140,7 @@
 .topic-row__track i.is-happy { background: #f2a044; }
 
 .chart-container { position: relative; }
-.chart-popover { position: absolute; z-index: 2; width: min(150px, 44%); padding: 9px 10px; border: 1px solid #efd7a8; border-radius: 12px; background: #fffaf0; color: #665136; box-shadow: 0 4px 14px #75532318; text-align: left; pointer-events: none; }
+.chart-popover { position: absolute; z-index: 2; width: max-content; max-width: 44%; padding: 8px 10px; border: 1px solid #efd7a8; border-radius: 12px; background: #fffaf0; color: #665136; box-shadow: 0 4px 14px #75532318; text-align: left; pointer-events: none; }
 .chart-popover__date { display: block; font-size: 11px; line-height: 1.6; }
 .chart-popover strong { display: block; margin-top: 3px; font-size: 13px; line-height: 1.6; word-break: keep-all; }
 .chart-popover button { position: absolute; top: -8px; right: -7px; width: 22px; height: 22px; display: grid; place-items: center; padding: 0; border: 1px solid #efd7a8; border-radius: 50%; background: #fffaf0; color: #71552c; font-size: 15px; pointer-events: auto; }

@@ -39,7 +39,7 @@ export default function AiReportContent({ kind, anchor, diaries, events, ai, onR
       <p className="report__summary">{summary.text}</p>
       <div className="report__pair">
         <button className="report__line" onClick={() => setDialog({ title: '행복이 담긴 경험', events: summary.positive })}><b><EmotionIcon emotion="행복" decorative /> 행복이 담긴 경험</b><span>{summary.positive.length}건 · {summary.positiveTopics || '해당 주제 없음'} →</span></button>
-        <button className="report__line is-negative" onClick={() => setDialog({ title: '무거운 감정이 담긴 경험', events: summary.negative })}><b><EmotionIcon emotion="불안함" decorative /> 무거운 감정이 담긴 경험</b><span>{summary.negative.length}건 · {summary.negativeTopics || '해당 주제 없음'} →</span></button>
+        <button className="report__line is-negative" onClick={() => setDialog({ title: '무거운 감정이 담긴 경험', events: summary.negative })}><b><img className="emotion-icon" src="/emotions/negative.png" width="28" height="28" alt="" /> 무거운 감정이 담긴 경험</b><span>{summary.negative.length}건 · {summary.negativeTopics || '해당 주제 없음'} →</span></button>
       </div>
       <h3 className="report__sub">반복해서 나타난 상황</h3>
       {situations.length === 0 ? <p className="analyze__empty">아직 반복된 상황을 찾지 못했어요.</p> : situations.map((s) =>

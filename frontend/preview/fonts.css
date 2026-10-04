@@ -1,0 +1,30 @@
+/* 비교용 글꼴은 개발 미리보기에서만 불러옵니다. */
+@import '@fontsource/jua/400.css';
+@import '@fontsource/nanum-gothic/400.css';
+@import '@fontsource/nanum-gothic/700.css';
+@import '@fontsource/nanum-pen-script/400.css';
+.font-comparison { max-width: 1000px; width: 100%; margin: 0 auto; padding: 28px 24px 48px; box-sizing: border-box; background: #fffdf5; color: #514737; font: 14px/1.7 system-ui, sans-serif; color-scheme: light; }
+.font-comparison header { margin-bottom: 24px; }
+.font-comparison header h1 { font: 700 24px/1.5 system-ui, sans-serif; color: #423526; margin: 12px 0; }
+.font-comparison header a, .font-candidate-open { color: #795220; }
+.font-comparison header small { display: block; margin-top: 8px; color: #7c705e; }
+.font-comparison__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.font-comparison article { overflow: hidden; border: 1px solid #ece1cb; border-radius: 20px; background: white; }
+.font-candidate-label { padding: 16px 20px; background: #fff5d5; }
+.font-candidate-label b, .font-candidate-label span { display: block; }
+.font-candidate-label span { font-size: 12px; margin-top: 3px; }
+.font-specimen { padding: 20px; font-family: var(--report-font), sans-serif; font-synthesis: weight; }
+.font-specimen h2 { font-family: var(--report-heading-font), sans-serif; font-size: 17px; color: #373326; margin: 0 0 14px; }
+.preview-font-scope h1, .preview-font-scope h2, .preview-font-scope .report-body h2 { font-weight: var(--preview-heading-weight, 700); }
+.font-specimen > strong { font-size: 15px; }
+.font-specimen p { font-size: 14px; line-height: 1.95; margin: 14px 0; word-break: keep-all; }
+.font-specimen__care { display: flex; align-items: center; gap: 10px; background: #fffaf0; border: 1px solid #f1e8d7; border-radius: 13px; padding: 12px; }
+.font-specimen__care strong { font-size: 16px; line-height: 1.65; }
+.font-specimen__care small { display: block; font-size: 12px; color: #76674f; }
+.font-specimen__numbers { font-size: 14px; margin: 16px 0; }
+.font-specimen__button { display: block; text-align: center; padding: 10px; border-radius: 12px; background: #ffdf68; font-size: 13px; font-weight: 700; }
+.font-candidate-open { display: block; padding: 13px; text-align: center; border-top: 1px solid #eee5d3; font-size: 13px; }
+.font-preview-controls { padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #fffaf0; color: #665136; font: 12px/1.7 system-ui, sans-serif; }
+.font-preview-controls select { max-width: 100%; font: inherit; padding: 5px; }
+.font-preview-controls a { color: #795220; }
+@media (max-width: 640px) { .font-comparison { padding: 20px 12px; } .font-comparison__grid { grid-template-columns: 1fr; } }
