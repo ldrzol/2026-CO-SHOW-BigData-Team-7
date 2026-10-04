@@ -22,7 +22,7 @@ export function Preview() {
   const [ai, setAi] = useState({ state: 'ready' })
   const kind = params.get('kind') === 'week' ? 'week' : 'month'
   const anchor = params.get('anchor') || previousPeriod(kind)
-  const font = FONT_OPTIONS.find((f) => f.key === params.get('font')) || FONT_OPTIONS[2]
+  const font = FONT_OPTIONS.find((f) => f.key === params.get('font')) || FONT_OPTIONS[0]
   return <>
     <aside style={{ padding: '8px 20px', fontSize: 12, color: '#82714a', background: '#fff8de' }}>가상 데이터 미리보기 · 저장·AI 요청 없음 <label>상태 <select aria-label="미리보기 상태" value={scenario} onChange={(e) => setScenario(e.target.value)}><option value="normal">기록 있음</option><option value="empty">기록 없음</option><option value="loading">불러오는 중</option><option value="error">불러오기 실패</option></select></label></aside>
     <div className="font-preview-controls"><label>비교할 글꼴 <select aria-label="비교할 글꼴" value={font.key} onChange={(e) => setParams((prev) => { const next = new URLSearchParams(prev); next.set('font', e.target.value); return next })}>{FONT_OPTIONS.map((f) => <option key={f.key} value={f.key}>{f.letter}. {f.name}</option>)}</select></label><Link to="/fonts">4가지 글꼴 나란히 비교하기</Link></div>

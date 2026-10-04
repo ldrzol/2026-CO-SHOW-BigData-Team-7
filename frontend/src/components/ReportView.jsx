@@ -331,7 +331,7 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
                 <strong>{r.emotion} 감정이 {r.days}일 이어졌어요</strong>
                 <small><time dateTime={r.start}>{r.start.slice(5).replace('-', '/')}</time> ~ <time dateTime={r.end}>{r.end.slice(5).replace('-', '/')}</time></small>
               </div>
-              <button className="report-text-button" onClick={() => setDialog({ title: `${r.emotion}이 이어진 기록`, diaries: inPeriod(all, r) })}>기록 보기 →</button>
+              <button className="report-text-button" onClick={() => setDialog({ title: `${r.emotion}이 이어진 기록`, hideDiaryTitles: true, diaries: inPeriod(all, r) })}>기록 보기 →</button>
             </div>
           ))}
           <button type="button" className="analyze__ghost" aria-expanded={careOpen} onClick={() => setCareOpen(!careOpen)}>

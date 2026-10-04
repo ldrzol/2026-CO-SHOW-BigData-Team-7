@@ -4,7 +4,7 @@ import './fonts.css'
 
 export default function FontComparison() {
   return <main className="font-comparison">
-    <header><Link to="/analyze">← 보고서로 돌아가기</Link><h1>보고서 글꼴, 어떤 느낌이 좋으세요?</h1><p>같은 글자 크기와 문구로 비교해 보세요. 마음에 드는 후보는 전체 보고서에서도 살펴볼 수 있어요.</p><small>후보 미리보기이며, 보고서의 기본 글꼴은 아직 바꾸지 않았어요.</small></header>
+    <header><Link to="/analyze">← 보고서로 돌아가기</Link><h1>보고서 글꼴, 어떤 느낌이 좋으세요?</h1><p>같은 글자 크기와 문구로 비교해 보세요. 마음에 드는 후보는 전체 보고서에서도 살펴볼 수 있어요.</p><small>현재 보고서에는 A. 주아체 제목 + 나눔고딕 본문을 적용했어요.</small></header>
     <div className="font-comparison__grid">{FONT_OPTIONS.map((font) => <article key={font.key}>
       <div className="font-candidate-label"><b>{font.letter}. {font.name}</b><span>{font.note}</span></div>
       <div className="font-specimen preview-font-scope" style={fontStyle(font)}>

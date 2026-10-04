@@ -1,4 +1,6 @@
-@import '@fontsource/gowun-dodum/400.css';
+@import '@fontsource/jua/400.css';
+@import '@fontsource/nanum-gothic/400.css';
+@import '@fontsource/nanum-gothic/700.css';
 
 /* 분석 제목·기간 선택·주간/월간 탭은 기존 App.css를 그대로 사용합니다. */
 .emotion-icon { object-fit: contain; vertical-align: middle; flex: none; }
@@ -129,7 +131,7 @@
 }
 
 /* 분석과 마음 돌봄에 동일한 둥근 글꼴을 적용합니다. */
-.analyze, .report-body, .evidence { --sans: var(--report-font, 'Gowun Dodum'), sans-serif; --heading: var(--report-heading-font, var(--report-font, 'Gowun Dodum')), sans-serif; font-family: var(--sans); font-synthesis: weight; }
+.analyze, .report-body, .evidence { --sans: var(--report-font, 'Nanum Gothic'), sans-serif; --heading: var(--report-heading-font, 'Jua'), sans-serif; font-family: var(--sans); font-synthesis: weight; }
 .analyze button { font-family: inherit; }
 .report-body h2 { font-size: 17px; }
 .report__summary, .evidence__list p { font-size: 14px; color: #514737; }
@@ -144,3 +146,6 @@
 .chart-popover__date { display: block; font-size: 11px; line-height: 1.6; }
 .chart-popover strong { display: block; margin-top: 3px; font-size: 13px; line-height: 1.6; word-break: keep-all; }
 .chart-popover button { position: absolute; top: -8px; right: -7px; width: 22px; height: 22px; display: grid; place-items: center; padding: 0; border: 1px solid #efd7a8; border-radius: 50%; background: #fffaf0; color: #71552c; font-size: 15px; pointer-events: auto; }
+
+/* 선택한 A 조합: 제목은 주아체의 기본 굵기, 본문은 나눔고딕입니다. */
+.analyze > h1, .report-body h1, .report-body h2, .report-body h3, .evidence h2 { font-family: var(--heading); font-weight: var(--report-heading-weight, 400); }
