@@ -2,12 +2,25 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{uid} {
-      // 이메일로 친구를 찾으려면 로그인한 사용자는 누구나 프로필(닉네임, 이메일)을 읽을 수 있어야 해요
-      allow read: if request.auth != null;
+      // 나, 내 친구, 나에게 친구 요청을 보낸 사람의 프로필만 볼 수 있어요.
+      // 이메일로 찾는 건 findFriend 함수가 서버에서 처리해요 (목록 조회는 아래에서 막아요)
+      allow get: if request.auth != null && (
+        request.auth.uid == uid
+        || exists(/databases/$(database)/documents/users/$(uid)/friends/$(request.auth.uid))
+        || exists(/databases/$(database)/documents/friendRequests/$(uid + '_' + request.auth.uid))
+      );
+      // 전체 사용자를 훑는 질의는 막아요. 이메일 검색은 서버 함수로만
+      allow list: if false;
+
       allow write: if request.auth != null && request.auth.uid == uid
         && request.resource.data.nickname is string
         && request.resource.data.nickname.size() >= 1
-        && request.resource.data.nickname.size() <= 10;
+        && request.resource.data.nickname.size() <= 10
+        // 남의 이메일을 적어 검색에 걸리게 만들 수 없어요.
+        // 이미 저장된 값을 그대로 두는 건 허용해요 (구글 계정 이메일이 바뀌어도 안 잠기게)
+        && (!('email' in request.resource.data)
+            || request.resource.data.email == request.auth.token.email
+            || (resource != null && request.resource.data.email == resource.data.email));
 
       // 친구 목록: 친구 요청이 있어야만 서로의 목록에 추가할 수 있어요
       match /friends/{fid} {
@@ -36,7 +49,12 @@ service cloud.firestore {
           request.auth.uid == uid
           || (resource.data.visibility == 'friends' && isFriendOfOwner())
         );
-        allow write: if request.auth != null && request.auth.uid == uid;
+        // 지우기는 isDeleted 플래그로 하고 문서는 남겨요 (삭제는 막혀 있어요)
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.diaryDate == did
+          && request.resource.data.body is string
+          && request.resource.data.body.size() <= 1000
+          && (!('title' in request.resource.data) || request.resource.data.title.size() <= 20);
 
         // 공감: 문서 ID 가 누른 사람 uid 라 한 사람당 한 번만 눌려요
         match /likes/{liker} {
@@ -53,7 +71,9 @@ service cloud.firestore {
             && (request.auth.uid == uid || isFriendOfOwner())
             && request.resource.data.body is string
             && request.resource.data.body.size() >= 1
-            && request.resource.data.body.size() <= 200;
+            && request.resource.data.body.size() <= 200
+            && request.resource.data.nickname is string
+            && request.resource.data.nickname.size() <= 10;
           allow delete: if request.auth != null
             && (request.auth.uid == resource.data.uid || request.auth.uid == uid);
         }
@@ -67,12 +87,17 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.from == request.auth.uid
         && request.resource.data.from != request.resource.data.to
-        && id == request.resource.data.from + '_' + request.resource.data.to;
+        && id == request.resource.data.from + '_' + request.resource.data.to
+        && request.resource.data.fromNickname is string
+        && request.resource.data.fromNickname.size() <= 10;
     }
 
         // 알림 토큰: 본인만 (users 문서는 다른 사람도 읽을 수 있어서 따로 둬요)
     match /pushTokens/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 0;
     }
 
     // 관리자 목록: 콘솔에서 직접 추가, 본인 여부만 확인할 수 있어요

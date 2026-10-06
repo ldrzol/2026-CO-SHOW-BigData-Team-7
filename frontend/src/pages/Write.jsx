@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CaretLeft } from '@phosphor-icons/react'
-import { doc, increment, serverTimestamp, setDoc } from 'firebase/firestore'
+import { doc, getDoc, increment, serverTimestamp, setDoc } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { auth, db, functions } from '../lib/firebase.js'
 import { characterLayers, loadImage, paint } from '../lib/character.js'
@@ -34,7 +34,8 @@ async function characterPng(character) {
 
 function Write({ profile }) {
   const navigate = useNavigate()
-  const [diaryDate, setDiaryDate] = useState(todayKey())
+  const [params] = useSearchParams()
+  const [diaryDate, setDiaryDate] = useState(params.get('date') || todayKey())
   const [weather, setWeather] = useState('맑음')
   const [emotion, setEmotion] = useState(EMOTIONS[0].label)
   const [intensity, setIntensity] = useState(3)
@@ -45,6 +46,30 @@ function Write({ profile }) {
   const [status, setStatus] = useState('') // '' | 'saving' | 'drawing'
   const [image, setImage] = useState('')
   const [comment, setComment] = useState('')
+  const [written, setWritten] = useState(false) // 그 날 이미 쓴 일기가 있는지
+  const commentDialog = useRef(null)
+
+  // 하루 한 편이라 날짜를 고르면 이미 쓴 일기를 꺼내 와요. 그대로 고쳐 쓰면 덮어써요
+  useEffect(() => {
+    let alive = true
+    getDoc(doc(db, 'users', auth.currentUser.uid, 'diaries', diaryDate))
+      .then((snap) => {
+        if (!alive) return
+        const d = snap.exists() && !snap.data().isDeleted ? snap.data() : null
+        setWritten(!!d)
+        setWeather(d?.weather ?? '맑음')
+        setEmotion(d?.userEmotion ?? EMOTIONS[0].label)
+        setIntensity(d?.emotionIntensity ?? 3)
+        setSatisfaction(d?.satisfaction ?? 3)
+        setVisibility(d?.visibility ?? 'private')
+        setTitle(d?.title ?? '')
+        setContent(d?.body ?? '')
+      })
+      .catch(console.error)
+    return () => {
+      alive = false
+    }
+  }, [diaryDate])
 
   const dateLabel = new Date(`${diaryDate}T00:00:00Z`).toLocaleDateString('ko-KR', {
     weekday: 'long',
@@ -100,6 +125,11 @@ function Write({ profile }) {
     setStatus('')
   }
 
+  // 한 줄 코멘트는 그림이 뜨면 팝업으로 한 번 보여줘요
+  useEffect(() => {
+    if (image && comment) commentDialog.current?.showModal()
+  }, [image, comment])
+
   if (image) {
     return (
       <main className="write">
@@ -107,10 +137,26 @@ function Write({ profile }) {
           <h1 className="write__title">오늘의 그림일기</h1>
         </header>
         <img src={image} alt="오늘의 그림일기" className="write__result" />
-        {comment && <p className="write__comment">{comment}</p>}
+        {comment && (
+          <button type="button" className="write__comment-open" onClick={() => commentDialog.current.showModal()}>
+            한 줄 코멘트 다시 보기
+          </button>
+        )}
         <button type="button" className="write__submit" onClick={() => navigate('/')}>
           완료
         </button>
+
+        <dialog
+          ref={commentDialog}
+          className="comment-pop"
+          onClick={(e) => e.target === commentDialog.current && commentDialog.current.close()}
+        >
+          <p className="comment-pop__from">삐뚤이 남긴 한 줄</p>
+          <p className="comment-pop__body">{comment}</p>
+          <button type="button" className="comment-pop__close" onClick={() => commentDialog.current.close()}>
+            닫기
+          </button>
+        </dialog>
       </main>
     )
   }
@@ -121,8 +167,10 @@ function Write({ profile }) {
         <button type="button" className="write__back" onClick={() => navigate(-1)} aria-label="뒤로가기">
           <CaretLeft size={20} />
         </button>
-        <h1 className="write__title">일기 작성</h1>
+        <h1 className="write__title">{written ? '일기 수정' : '일기 작성'}</h1>
       </header>
+
+      {written && <p className="write__notice">이 날은 이미 일기를 썼어요. 고쳐 쓰면 그림도 새로 그려요.</p>}
 
       <div className="write__card">
         <label className="write__label" htmlFor="write-date">날짜 · {dateLabel}</label>
@@ -168,7 +216,7 @@ function Write({ profile }) {
               className={emotion === label ? 'write__mood is-active' : 'write__mood'}
               onClick={() => setEmotion(label)}
             >
-              <EmotionIcon emotion={label} size={40} decorative />
+              <EmotionIcon emotion={label} size={36} decorative />
               {label}
             </button>
           ))}

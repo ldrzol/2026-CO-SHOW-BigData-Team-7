@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { doc, updateDoc } from 'firebase/firestore'
-import { auth, db } from '../lib/firebase.js'
+import { httpsCallable } from 'firebase/functions'
+import { auth, db, functions } from '../lib/firebase.js'
 import { disablePush, enablePush, isPushOn } from '../lib/push.js'
 import { CaretRight, Crown, PencilSimple, SignOut, Trash } from '@phosphor-icons/react'
 import CharacterCanvas from '../components/CharacterCanvas.jsx'
@@ -21,6 +22,7 @@ function Setting({ profile, onProfileChange }) {
   const [editing, setEditing] = useState(false)
   const [nickname, setNickname] = useState(profile.nickname)
   const [saving, setSaving] = useState(false)
+  const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
     isPushOn(uid).then(setNotifyOn).catch(console.error)
@@ -71,8 +73,27 @@ function Setting({ profile, onProfileChange }) {
     // TODO: 결제창으로 이동 → 결제 완료 시 프리미엄 활성화
   }
   
-  function handleWithdraw() {
-    // TODO: 회원탈퇴 처리 (데이터 초기화)
+  // 되돌릴 수 없어서 닉네임을 직접 적게 해서 한 번 더 확인해요
+  async function handleWithdraw() {
+    if (leaving) return
+    const typed = window.prompt(
+      `정말 탈퇴하시겠어요?\n일기, 그림, 친구, 프로필이 모두 지워지고 되돌릴 수 없어요.\n\n계속하려면 닉네임 "${profile.nickname}" 을 그대로 적어주세요.`,
+    )
+    if (typed === null) return
+    if (typed.trim() !== profile.nickname) {
+      return window.alert('닉네임이 달라서 취소했어요.')
+    }
+    setLeaving(true)
+    try {
+      await httpsCallable(functions, 'deleteAccount', { timeout: 540000 })()
+      window.alert('탈퇴가 완료됐어요. 그동안 고마웠어요.')
+      await signOut(auth).catch(() => {}) // 계정이 이미 지워져 실패해도 괜찮아요
+      window.location.replace('/login')
+    } catch (e) {
+      console.error(e)
+      setLeaving(false)
+      window.alert('탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.')
+    }
   }
 
   return (
@@ -168,9 +189,9 @@ function Setting({ profile, onProfileChange }) {
         </button>
       </div>
 
-      <button type="button" className="setting__withdraw" onClick={handleWithdraw}>
+      <button type="button" className="setting__withdraw" onClick={handleWithdraw} disabled={leaving}>
         <Trash size={18} />
-        회원탈퇴 (데이터 초기화)
+        {leaving ? '탈퇴 처리 중…' : '회원탈퇴 (데이터 초기화)'}
       </button>
       <p className="setting__warning">
         회원탈퇴 시 이 계정의 모든 일기·친구·프로필이 삭제되고 되돌릴 수 없어요.

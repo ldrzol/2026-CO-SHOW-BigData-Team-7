@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { PencilSimple, X } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, onSnapshot } from 'firebase/firestore'
 import Calendar from '../components/Calendar.jsx'
 import { auth, db } from '../lib/firebase.js'
-import { dateLabel, emotionIcon } from '../lib/report.js'
+import { dateLabel, emotionIcon, todayKey } from '../lib/report.js'
 
 function Home() {
   const navigate = useNavigate()
@@ -12,21 +12,25 @@ function Home() {
   const [openKey, setOpenKey] = useState(null)
   const dialog = useRef(null)
 
-  // 일기는 하루 한 편이라 전부 읽어도 1년에 365개예요. 오프라인 캐시가 있어서 두 번째부터는 바로 떠요
-  useEffect(() => {
-    getDocs(collection(db, 'users', auth.currentUser.uid, 'diaries'))
-      .then((snap) =>
-        setDiaries(
-          Object.fromEntries(
-            snap.docs
-              .map((d) => d.data())
-              .filter((d) => !d.isDeleted && d.diaryDate)
-              .map((d) => [d.diaryDate, d]),
+  // 일기는 하루 한 편이라 전부 읽어도 1년에 365개예요.
+  // onSnapshot 이라 저장된 사본이 먼저 뜨고, 서버 응답이 오면 조용히 갱신돼요
+  useEffect(
+    () =>
+      onSnapshot(
+        collection(db, 'users', auth.currentUser.uid, 'diaries'),
+        (snap) =>
+          setDiaries(
+            Object.fromEntries(
+              snap.docs
+                .map((d) => d.data())
+                .filter((d) => !d.isDeleted && d.diaryDate)
+                .map((d) => [d.diaryDate, d]),
+            ),
           ),
-        ),
-      )
-      .catch(console.error)
-  }, [])
+        console.error,
+      ),
+    [],
+  )
 
   const entries = Object.fromEntries(
     Object.entries(diaries)
@@ -41,11 +45,26 @@ function Home() {
   }
 
   const diary = openKey && diaries[openKey]
+  const today = todayKey()
 
   return (
-    <main>
+    <main className="home">
+      <header className="home__header">
+        <img src="/icon-192.png" alt="" className="home__logo" />
+        <div>
+          <p className="home__brand">삐뚤</p>
+          <p className="home__today">{dateLabel(today)}</p>
+        </div>
+      </header>
+
       <Calendar entries={entries} onDateClick={handleDateClick} />
-      <button type="button" className="fab" onClick={() => navigate('/write')} aria-label="일기 작성">
+
+      <button
+        type="button"
+        className="fab"
+        onClick={() => navigate(diaries[today] ? `/write?date=${today}` : '/write')}
+        aria-label={diaries[today] ? '오늘 일기 수정' : '일기 작성'}
+      >
         <PencilSimple size={24} weight="bold" />
       </button>
 
@@ -70,6 +89,9 @@ function Home() {
             )}
             {diary.title && <p className="diary__title">{diary.title}</p>}
             <p className="diary__body">{diary.body}</p>
+            <button type="button" className="diary__edit" onClick={() => navigate(`/write?date=${openKey}`)}>
+              이 날 일기 수정하기
+            </button>
           </>
         )}
       </dialog>

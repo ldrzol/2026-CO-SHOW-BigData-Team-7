@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { ChatCircle, Heart, MagnifyingGlass, UserPlus, X } from '@phosphor-icons/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Bell, ChatCircle, Heart, MagnifyingGlass, UserPlus, X } from '@phosphor-icons/react'
 import {
   addDoc,
   collection,
@@ -8,7 +8,6 @@ import {
   documentId,
   getDoc,
   getDocs,
-  limit,
   onSnapshot,
   orderBy,
   query,
@@ -17,10 +16,12 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore'
-import { auth, db } from '../lib/firebase.js'
-import { addDays, EMOTIONS, todayKey } from '../lib/report.js'
+import { httpsCallable } from 'firebase/functions'
+import { auth, db, functions } from '../lib/firebase.js'
+import { addDays, todayKey } from '../lib/report.js'
 import { DEFAULT_CHARACTER } from '../lib/character.js'
 import CharacterCanvas from '../components/CharacterCanvas.jsx'
+import EmotionIcon from '../components/EmotionIcon.jsx'
 
 // 커스터마이징 전 사용자도 있을 수 있어서 기본 캐릭터로 떨어뜨려요
 const Avatar = ({ character, className }) => (
@@ -30,8 +31,26 @@ const Avatar = ({ character, className }) => (
 // uid 로 그 사람의 캐릭터만 꺼내요 (users 문서는 로그인하면 누구나 읽을 수 있어요)
 const characterOf = (uid) => getDoc(doc(db, 'users', uid)).then((s) => s.data()?.character)
 
+// 알림을 마지막으로 확인한 시각 — 기기에만 남겨요 (시크릿 모드에선 접근이 막힐 수 있어요)
+const SEEN_KEY = 'ppittul.alarmSeen'
+const readSeen = () => {
+  try {
+    return Number(localStorage.getItem(SEEN_KEY) || 0)
+  } catch {
+    return 0
+  }
+}
+const writeSeen = (at) => {
+  try {
+    localStorage.setItem(SEEN_KEY, String(at))
+  } catch {
+    /* 저장 못 해도 이번 화면에서는 읽음으로 보여요 */
+  }
+}
+const millis = (ts) => ts?.toMillis?.() ?? 0
+
 // ponytail: 글마다 공감·댓글을 따로 구독해요. 피드가 길어지면 리스너가 늘어나니 그때 페이지네이션으로
-function FriendPost({ post, me, myNickname }) {
+function FriendPost({ post, me, myNickname, onActivity }) {
   const base = `users/${post.uid}/diaries/${post.diaryDate}`
   const [likes, setLikes] = useState([])
   const [comments, setComments] = useState([])
@@ -42,7 +61,7 @@ function FriendPost({ post, me, myNickname }) {
     () =>
       onSnapshot(
         collection(db, base, 'likes'),
-        (snap) => setLikes(snap.docs.map((d) => d.id)),
+        (snap) => setLikes(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
         console.error,
       ),
     [base],
@@ -58,7 +77,16 @@ function FriendPost({ post, me, myNickname }) {
     [base],
   )
 
-  const liked = likes.includes(me)
+  // 내 일기에 달린 반응만 알림으로 모아요 (내가 누른 건 빼고요)
+  useEffect(() => {
+    if (post.uid !== me) return
+    onActivity(post.key, [
+      ...likes.filter((l) => l.id !== me).map((l) => ({ id: `${post.key}_like_${l.id}`, uid: l.id, kind: '공감', at: millis(l.createdAt) })),
+      ...comments.filter((c) => c.uid !== me).map((c) => ({ id: `${post.key}_cmt_${c.id}`, uid: c.uid, name: c.nickname, kind: '댓글', body: c.body, at: millis(c.createdAt) })),
+    ].map((a) => ({ ...a, diaryDate: post.diaryDate })))
+  }, [post.uid, post.key, post.diaryDate, me, likes, comments, onActivity])
+
+  const liked = likes.some((l) => l.id === me)
 
   function toggleLike() {
     const ref = doc(db, base, 'likes', me)
@@ -84,22 +112,21 @@ function FriendPost({ post, me, myNickname }) {
       <div className="friend__post-head">
         <Avatar character={post.character} className="friend__avatar is-sm" />
         <div className="friend__name">
-          {post.nickname}
+          {post.uid === me ? `${post.nickname} (나)` : post.nickname}
           <p className="friend__sub">{post.diaryDate}</p>
         </div>
-        <span className="friend__mood">
-          {EMOTIONS.find((e) => e.label === post.userEmotion)?.emoji}
-        </span>
+        <EmotionIcon emotion={post.userEmotion} size={28} decorative />
       </div>
 
-      {post.imageUrl && (
+      {/* 피드에는 그림일기만 보여줘요. 본문은 그림 안에 이미 적혀 있어요 */}
+      {post.imageUrl ? (
         <div className="friend__picture">
-          <img src={post.imageUrl} alt="" />
+          <img src={post.imageUrl} alt={post.title || '그림일기'} />
         </div>
+      ) : (
+        <p className="friend__post-text">그림은 아직 없어요</p>
       )}
       {post.title && <p className="friend__post-title">{post.title}</p>}
-      {post.body && <p className="friend__post-text">{post.body}</p>}
-      {post.aiComment && <p className="friend__sub">{post.aiComment}</p>}
 
       <div className="friend__reactions">
         <button
@@ -160,7 +187,10 @@ function Friend({ profile }) {
   const [filter, setFilter] = useState('')
   const [result, setResult] = useState() // undefined: 검색 전, null: 검색 결과 없음
   const [message, setMessage] = useState('')
+  const [activity, setActivity] = useState({}) // { 글키: [반응] }
+  const [seen, setSeen] = useState(readSeen)
   const addDialog = useRef(null)
+  const alarmDialog = useRef(null)
 
   // 내 친구 목록 (실시간) — 닉네임은 친구 문서에, 캐릭터는 상대 프로필에서
   useEffect(
@@ -198,12 +228,12 @@ function Friend({ profile }) {
     [me],
   )
 
-  // 친구들의 '친구 공개' 일기 — 최근 90일치만 모아요
+  // 친구들과 내 '친구 공개' 일기 — 최근 90일치만 모아요
   useEffect(() => {
-    if (!friends.length) return setFeed([])
     const since = addDays(todayKey(), -90) // 문서 ID 가 날짜라 ID 범위로 자를 수 있어요
+    const people = [{ id: me, nickname: profile.nickname, character: profile.character }, ...friends]
     Promise.all(
-      friends.map(({ id, nickname, character }) =>
+      people.map(({ id, nickname, character }) =>
         getDocs(
           query(
             collection(db, 'users', id, 'diaries'),
@@ -219,15 +249,31 @@ function Friend({ profile }) {
         setFeed(all.flat().filter((d) => !d.isDeleted).sort((a, b) => b.diaryDate.localeCompare(a.diaryDate))),
       )
       .catch(console.error)
-  }, [friends])
+  }, [friends, me, profile.nickname, profile.character])
 
+  const handleActivity = useCallback((key, items) => {
+    setActivity((prev) => (prev[key]?.length === items.length && items.every((it, i) => prev[key][i].id === it.id) ? prev : { ...prev, [key]: items }))
+  }, [])
+
+  const alarms = Object.values(activity).flat().sort((a, b) => b.at - a.at)
+  const unseen = alarms.filter((a) => a.at > seen).length
+  const nameOf = (uid) => friends.find((f) => f.id === uid)?.nickname ?? '친구'
+
+  function openAlarms() {
+    alarmDialog.current.showModal()
+    const now = Date.now()
+    writeSeen(now)
+    setSeen(now)
+  }
+
+  // 전체 사용자 목록은 닫혀 있어서 검색은 서버 함수가 대신 해줘요
   async function handleSearch(e) {
     e.preventDefault()
     setMessage('')
     const email = new FormData(e.target).get('email').trim().toLowerCase()
     try {
-      const snap = await getDocs(query(collection(db, 'users'), where('email', '==', email), limit(1)))
-      setResult(snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() })
+      const { data } = await httpsCallable(functions, 'findFriend')({ email })
+      setResult(data.found ? { ...data, email } : null)
     } catch (err) {
       console.error(err)
       setMessage('검색에 실패했어요. 잠시 후 다시 시도해주세요.')
@@ -278,6 +324,15 @@ function Friend({ profile }) {
         <h1>친구</h1>
         <button
           type="button"
+          className="friend__icon-btn friend__bell"
+          aria-label={unseen ? `알림 ${unseen}개` : '알림'}
+          onClick={openAlarms}
+        >
+          <Bell size={22} weight={unseen ? 'fill' : 'regular'} />
+          {unseen > 0 && <span className="friend__badge">{unseen > 9 ? '9+' : unseen}</span>}
+        </button>
+        <button
+          type="button"
           className="friend__icon-btn"
           aria-label="친구 추가"
           onClick={() => addDialog.current.showModal()}
@@ -285,6 +340,30 @@ function Friend({ profile }) {
           <UserPlus size={22} />
         </button>
       </header>
+
+      <dialog ref={alarmDialog} className="friend__dialog">
+        <div className="friend__dialog-head">
+          <h2>알림</h2>
+          <button
+            type="button"
+            className="friend__icon-btn"
+            aria-label="닫기"
+            onClick={() => alarmDialog.current.close()}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        {alarms.length === 0 ? (
+          <p className="friend__sub">아직 받은 반응이 없어요.</p>
+        ) : (
+          alarms.slice(0, 30).map((a) => (
+            <p key={a.id} className={a.at > seen ? 'friend__alarm is-new' : 'friend__alarm'}>
+              <strong>{a.name ?? nameOf(a.uid)}</strong>님이 {a.diaryDate} 일기에 {a.kind}을 남겼어요
+              {a.body && <span className="friend__sub">{a.body}</span>}
+            </p>
+          ))
+        )}
+      </dialog>
 
       <dialog
         ref={addDialog}
@@ -322,10 +401,10 @@ function Friend({ profile }) {
             <button
               type="button"
               className="friend__btn is-primary"
-              disabled={result.id === me || isFriend}
+              disabled={result.isMe || isFriend}
               onClick={sendRequest}
             >
-              {result.id === me ? '나' : isFriend ? '친구' : '추가'}
+              {result.isMe ? '나' : isFriend ? '친구' : '추가'}
             </button>
           </div>
         )}
@@ -367,7 +446,7 @@ function Friend({ profile }) {
           <p className="friend__section">아직 친구 일기가 없어요.</p>
         ) : (
           feed.map((d) => (
-            <FriendPost key={d.key} post={d} me={me} myNickname={profile.nickname} />
+            <FriendPost key={d.key} post={d} me={me} myNickname={profile.nickname} onActivity={handleActivity} />
           ))
         )
       ) : (

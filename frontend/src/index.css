@@ -13,9 +13,15 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
+  /* 상태바를 투명하게 뒀으니 그 높이만큼 내용을 내려줘야 해요 */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* 하단바가 차지하는 실제 높이. 화면마다 다시 계산하지 않게 여기서 한 번만 정해요 */
+  --nav-h: calc(56px + max(8px, var(--safe-bottom)));
+
   font: 16px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -24,26 +30,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #ffe068;
-    --sub: #fff2bd;
-    --accent-bg: rgba(255, 224, 104, 0.15);
-    --accent-border: rgba(255, 224, 104, 0.5);
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
   margin: 0;
+  /* 웹페이지처럼 위아래로 늘어났다 돌아오는 바운스를 막아요 */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #root {
-  min-height: 100svh;
+  /* svh(툴바 보이는 최소 높이) 대신 dvh — 지금 실제로 보이는 높이에 맞춰져요 */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -79,4 +80,11 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* 스플래시·로그인처럼 노란 화면일 때는 캔버스까지 노랗게.
+   상태바 뒤·오버스크롤 영역이 흰색으로 비치는 걸 막아요 */
+html.is-brand,
+html.is-brand body {
+  background: #ffe068;
 }

@@ -21,6 +21,8 @@ import {
 } from '../lib/report.js'
 
 const EMPTY_DIARIES = []
+// '2026-08-25' → '8월 25일'
+const dayLabel = (key) => `${Number(key.slice(5, 7))}월 ${Number(key.slice(8))}일`
 const W = 320
 const H = 180
 const PX = 30
@@ -320,26 +322,31 @@ function ReportView({ diaries, events, kind, anchor, onPeriodChange, ai, loadAi,
         </div>
       </section>
 
-      {/* B06 마음 돌봄 — 조건 미충족이면 카드 자체를 숨겨요 */}
-      {care.length > 0 && (
-        <section className="analyze__card">
+      {/* B06 마음 돌봄 — 이어진 감정이 없어도 돌봄은 언제나 열어둬요 */}
+      <section className="analyze__card">
           <h2>마음 돌봄 🌱</h2>
-          <p className="report-care-intro">마음에 작은 쉼표를 선물해 볼까요?</p>
+          <p className="report-care-intro">내 마음에 작은 쉼표를 선물해요.</p>
           {care.map((r) => (
             <div key={r.start} className="analyze__care">
-              <EmotionIcon emotion={r.emotion} size={36} decorative /><div className="report-care-message">
-                <strong>{r.emotion} 감정이 {r.days}일 이어졌어요</strong>
-                <small><time dateTime={r.start}>{r.start.slice(5).replace('-', '/')}</time> ~ <time dateTime={r.end}>{r.end.slice(5).replace('-', '/')}</time></small>
+              <span className="care-streak-emoji"><EmotionIcon emotion={r.emotion} size={30} decorative /></span>
+              <div className="report-care-message">
+                <strong><time dateTime={r.start}>{dayLabel(r.start)}</time>~<time dateTime={r.end}>{dayLabel(r.end)}</time> · {r.days}일</strong>
+                <small>{r.emotion}을 연속으로 선택한 기록</small>
               </div>
-              <button className="report-text-button" onClick={() => setDialog({ title: `${r.emotion}이 이어진 기록`, hideDiaryTitles: true, diaries: inPeriod(all, r) })}>기록 보기 →</button>
+              <button className="report-text-button" onClick={() => setDialog({ title: `${r.emotion}이 이어진 기록`, hideDiaryTitles: true, diaries: inPeriod(all, r) })}>보기</button>
             </div>
           ))}
-          <button type="button" className="analyze__ghost" aria-expanded={careOpen} onClick={() => setCareOpen(!careOpen)}>
-            감정 환기 방법 보기 {careOpen ? '−' : '+'}
-          </button>
-          {careOpen && <div className="report-care-options"><Link to={`/analyze/care?view=activity&emotion=${encodeURIComponent(care.at(-1).emotion)}&kind=${kind}&anchor=${anchor}`}>🌿 가볍게 해볼 활동 고르기 <span>›</span></Link><Link to={`/analyze/care?view=help&kind=${kind}&anchor=${anchor}`}>📖 전문가 정보 보기 <span>›</span></Link></div>}
+          <div className="care-prompt">
+            <p>
+              {care.length ? <>이 기간에는 {care.at(-1).emotion}이 이어졌네요.<br />지금 나에게 맞는 돌봄을 골라볼까요?</>
+                           : <>같은 감정이 사흘 넘게 이어진 날은 없었어요.<br />그래도 쉬어가고 싶다면 골라보세요.</>}
+            </p>
+            <button type="button" className="report-primary" aria-expanded={careOpen} onClick={() => setCareOpen(!careOpen)}>
+              감정 환기 방법 보기 →
+            </button>
+            {careOpen && <div className="report-care-options"><Link to={`/analyze/care?view=activity${care.length ? `&emotion=${encodeURIComponent(care.at(-1).emotion)}` : ''}&kind=${kind}&anchor=${anchor}`}>🌿 가볍게 해볼 활동 고르기 <span>›</span></Link><Link to={`/analyze/care?view=help&kind=${kind}&anchor=${anchor}`}>📖 전문가 정보 보기 <span>›</span></Link></div>}
+          </div>
         </section>
-      )}
 
       <section className="analyze__card report-entry">
         <h2>AI 리포트 보기</h2>

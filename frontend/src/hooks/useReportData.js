@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, onSnapshot } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { auth, db, functions } from '../lib/firebase.js'
 import { inPeriod, normalizeDiary } from '../lib/report.js'
@@ -21,22 +21,31 @@ export default function useReportData() {
     return snap.docs.map((d) => ({ ...d.data(), id: d.id }))
   }, [])
 
-  const load = useCallback(async () => {
-    try {
-      const rows = await read('diaries')
-      if (alive.current) { setDiaries(rows.filter((d) => !d.isDeleted).map(normalizeDiary)); setError(false) }
-    } catch {
-      if (alive.current) setError(true)
-    }
-  }, [read])
+  const [attempt, setAttempt] = useState(0)
+  const load = useCallback(() => setAttempt((n) => n + 1), [])
 
+  // onSnapshot 은 기기에 저장된 사본을 먼저 주고, 서버 응답이 오면 다시 불러요.
+  // 두 번째 방문부터는 기다리지 않고 바로 떠요
   useEffect(() => {
     alive.current = true
-    // Firebase 조회 후 비동기로만 상태를 갱신하는 외부 데이터 동기화입니다.
-    // oxlint-disable-next-line react/set-state-in-effect
-    load()
-    return () => { alive.current = false }
-  }, [load])
+    const uid = auth.currentUser?.uid
+    if (!uid) {
+      // 로그인 상태는 Firebase 쪽 외부 상태라 effect 안에서만 알 수 있어요
+      // oxlint-disable-next-line react/set-state-in-effect
+      setError(true)
+      return () => { alive.current = false }
+    }
+    const stop = onSnapshot(
+      collection(db, 'users', uid, 'diaries'),
+      (snap) => {
+        if (!alive.current) return
+        setDiaries(snap.docs.map((d) => ({ ...d.data(), id: d.id })).filter((d) => !d.isDeleted).map(normalizeDiary))
+        setError(false)
+      },
+      () => { if (alive.current) setError(true) },
+    )
+    return () => { alive.current = false; stop() }
+  }, [attempt])
 
   const loadAi = useCallback(async (range) => {
     if (!diaries) return

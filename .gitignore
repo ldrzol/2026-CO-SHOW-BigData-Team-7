@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .firebase/
+
+# 규칙 테스트 의존성
+rules-test/node_modules/

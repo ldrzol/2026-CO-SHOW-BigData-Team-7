@@ -54,9 +54,17 @@ function App() {
       })
   }, [user])
 
-  if (showSplash || user === undefined || (user && profile === undefined)) {
-    return <Splash />
-  }
+  // 스플래시·로그인·닉네임은 노란 화면이라 캔버스(html) 배경도 같이 노랗게 둬요.
+  // 안 그러면 상태바 뒤나 오버스크롤 영역이 흰색으로 비쳐요
+  const splash = showSplash || user === undefined || (user && profile === undefined)
+  const brand = splash || (user && !profile)
+  const onLogin = location.pathname === '/login'
+  useEffect(() => {
+    if (onLogin) return // 로그인 화면은 Login 이 직접 칠해요 (첫 화면 노랑 / 이메일 화면 흰색)
+    document.documentElement.classList.toggle('is-brand', !!brand)
+  }, [brand, onLogin])
+
+  if (splash) return <Splash />
 
   const isLoginPage = location.pathname === '/login'
   if (!user && !isLoginPage) return <Navigate to="/login" replace />
@@ -64,9 +72,11 @@ function App() {
   if (user && !profile) return <Nickname user={user} onDone={setProfile} />
   if (user && !profile.character) return <Customize user={user} profile={profile} onDone={setProfile} />
 
+  const showNav = !['/login', '/write', '/setting/customize'].includes(location.pathname)
+
   return (
     <>
-      <main className="page">
+      <main className={showNav ? 'page' : 'page page--full'}>
         <Routes>
           <Route path="/analyze/detail" element={<AnalyzeDetail />} />
           <Route path="/" element={<Home />} />
@@ -84,7 +94,7 @@ function App() {
           <Route path="/write" element={<Write profile={profile} />} />
         </Routes>
       </main>
-      {!['/login', '/write', '/setting/customize'].includes(location.pathname) && <BottomNav />}
+      {showNav && <BottomNav />}
       </>
   )
 }
